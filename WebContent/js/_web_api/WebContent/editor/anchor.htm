@@ -1,0 +1,280 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="../web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper._language_new_version=null;
+$wapper.win_remark = "$api.win.frames[0]";
+$wapper.api.include("language,dialog,files_web");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var aOtherHrefRadio=new Array();
+var sAnchorJS=$wapper.api.getQueryString("anchor_js","");
+
+function addOtherHrefRadio(sId,sLabel){
+	aOtherHrefRadio[aOtherHrefRadio.length]=sId;
+	aOtherHrefRadio[aOtherHrefRadio.length]=sLabel;
+}
+if(sAnchorJS){
+	document.write("<script language=javascript src=\""+sAnchorJS+(sAnchorJS.indexOf("?")==-1?"?":"&")+Math.random()+"\"><\/script>");
+}
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var objIn=null;
+if($wapper.api.getQueryString("object_id","")!=""){
+	objIn=$api.win.dialogArguments.getEditorDOM().getElementById($wapper.api.getQueryString("object_id",""));
+}
+
+var oAnchor=null;
+var bCloseTop=true;
+
+function chkUnzip_onclick(){
+	var sExt=$api.fn.getFileExtName(form1.txtFile.value);
+	if(sExt==null){
+		sExt="";
+	}
+	sExt=sExt.toUpperCase();
+	if(sExt!="ZIP"){
+		alert(sPleaseSelectZip);
+		form1.chkUnzip.checked=false;
+		return;
+	}
+	trMainFile.style.display=(form1.chkUnzip.checked?"":"none");
+}
+
+function selTarget_onchange(){
+	if(form1.selTarget.selectedIndex==1){
+		form1.txtTarget.style.display="";
+		if(form1.txtTarget.value=="_self"||form1.txtTarget.value==""){
+			form1.txtTarget.value="_blank";
+		}
+	}
+	else{
+		form1.txtTarget.value="_self";
+		form1.txtTarget.style.display="none";
+	}
+}
+
+function doOK(){
+	if($api.fn.trim(form1.txtTitle.value)==""){
+		alert(sTitleRequired);
+		form1.txtTitle.focus();
+		return;
+	}
+	if(!document.getElementById("rdoHrefUpload").checked&&form1.txtHref.value.replace(/ /g,"")==""){
+		alert(sAddrError);
+		form1.txtHref.focus();
+		return;
+	}
+	if(document.getElementById("rdoHrefUpload").checked){
+		doUpload();
+		return;
+	}
+	doOutput();
+}
+
+function doUpload(){
+	if(form1.txtFile.value==""){
+		alert(sPleaseSelectFile);
+		form1.txtFile.focus();
+		return;
+	}
+	if(form1.chkUnzip.checked){
+		chkUnzip_onclick();
+	}
+	if(form1.chkUnzip.checked&&form1.txtMainFile.value.replace(/ /g,"")==""){
+		alert(sSelectIndexFile);
+		form1.txtMainFile.focus();
+		return;
+	}
+	form1.action=getUploadAction($wapper.api.getQueryString("files_web"),"folder="+$wapper.api.getQueryString("folder","upload")+"&auto_unzip="+(form1.chkUnzip.checked?1:0)+"&main_file="+$api.fn.encodeURL(form1.txtMainFile.value)+"&script=parent.afterUpload()");
+	form1.submit();
+
+}
+
+function afterUpload(){
+	if(w_hidden.getFileCount()!=1||w_hidden.getLastError()){
+		alert(w_hidden.getLastError());
+		return;
+	}
+	var sUrl=w_hidden.getFileURL(0);
+	form1.txtHref.value=$api.fn.formatFileName(sUrl,"/");
+	doOutput();
+}
+
+function doOutput(){
+	if(form1.selTarget.selectedIndex==1&&form1.txtTarget.value.replace(/ /g,"")==""){
+		form1.txtTarget.value="_blank";
+	}
+	if(!oAnchor){
+		var sInnerHTML="";
+		if(objIn==null){
+			if(form1.txtTitle.disabled){
+				sInnerHTML=form1.txtHtml.value;
+			}
+			else{
+				sInnerHTML=form1.txtTitle.value;
+			}
+		}
+		else{
+			if(objIn.tagName=="IMG"){
+				objIn.border="0";
+				objIn.style.border="0";
+			}
+			sInnerHTML=$api.fn.getOuterHTML(objIn);
+		}
+		//原来没有链接对象
+		var sHtml="<A href=\"";
+		sHtml+=form1.txtHref.value;
+		sHtml+="\"";
+		sHtml+=" target="+form1.txtTarget.value+">"+sInnerHTML+"</A>";
+	}
+	else{
+		oAnchor.href=form1.txtHref.value;
+		oAnchor.target=form1.txtTarget.value
+		sHtml = $api.fn.getOuterHTML(oAnchor);
+	}
+	form1.btnApply.disabled=true;
+	setReturnValue(sHtml);
+	if(bCloseTop){
+		$api.win.close();
+	}
+}
+
+function window_onload(){
+	if(objIn&&objIn.tagName=="A"){
+		oAnchor=objIn;
+	}
+    if(oAnchor){
+		form1.txtTitle.disabled=true;
+		form1.txtTitle.value=sAnchorObject;
+		form1.txtHref.value=(oAnchor?oAnchor.href:"");
+		form1.txtTarget.value=oAnchor.target;
+		if(form1.txtTarget.value!="_self"&&form1.txtTarget.value!=""){
+			form1.selTarget.selectedIndex=1;
+		}
+		else{
+			form1.selTarget.selectedIndex=0;
+		}
+		form1.btnApply.style.display="";
+	}
+	else{
+		if(objIn){
+			form1.txtTitle.disabled=true;
+			form1.txtTitle.value=sSelectedObject;
+		}
+		else{
+			form1.txtHtml.value=$wapper.api.getQueryString("title","");
+			if(form1.txtHtml.value!=""){
+				form1.txtTitle.value=sHtmlText;
+				form1.txtTitle.disabled=true;
+			}
+		}
+	}
+	selTarget_onchange();
+	rdoHrefUpload_onclick();
+}
+
+function txtFile_onfocus(){
+	if(form1.txtFile.value==""){
+		return;
+	}
+	form1.txtTitle.value=$api.fn.getFileBaseName(form1.txtFile.value);
+}
+
+function rdoHrefCustom_onclick(){
+	form1.btnSelectHref.value="选择";
+	form1.txtHref.disabled=false;
+	form1.btnSelectHref.disabled=true;
+	tblUpload.style.display="none";
+	form1.selTarget.disabled=false;
+	form1.txtHref.focus();
+}
+
+function rdoHrefUpload_onclick(){
+	form1.btnSelectHref.value="选择";
+	form1.txtHref.disabled=true;
+	form1.btnSelectHref.disabled=true;
+	tblUpload.style.display="";
+	form1.selTarget.disabled=false;
+}
+
+function otherHrefRadio_onclick(sRadioId){
+	form1.btnSelectHref.value="选择";
+	form1.txtHref.disabled=true;
+	form1.btnSelectHref.disabled=false;
+	tblUpload.style.display="none";
+	if(typeof(onCustomHrefRadioUI)=="function"){
+		onCustomHrefRadioUI(sRadioId);
+	}
+}
+
+function btnSelectHref_onclick(){
+	if(typeof(onCustomHrefRadio)=="function"){
+		for(var i=0;i<form1.elements.length;i++){
+			if(form1.elements[i].name=="rdoHref"&&form1.elements[i].checked){
+				onCustomHrefRadio(form1.elements[i].id)
+				break;
+			}
+		}
+	}
+}
+
+function setAnchorHref(sHref){
+	form1.txtHref.value=sHref;
+}
+
+function setAnchorText(sText){
+	if(!form1.txtTitle.disabled){
+		form1.txtTitle.value=sText;
+	}
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload()" bgcolor="#F0F0F0" style=margin:0 scroll=no>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+document.write("<div style=\"height:53px;background:white;\"> ");
+document.write("<table width=100% cellpadding=0 cellspacing=0> ");
+document.write("<tr><td width=20px><td><b>"+sInsertAnchor+"</b> ");
+document.write("<td align=right><img src=\""+$api._libaray_path+"/images/mousetip.gif\" align=absmiddle width=\"55\" height=\"53\"> ");
+document.write("</table> ");
+document.write("</div> ");
+document.write("<FORM METHOD=POST ACTION=\"\" ENCTYPE=\"multipart/form-data\" name=form1 target=\"w_hidden\"> ");
+document.write("<table align=center style=\"margin-top:10px;\" border=0 width=\"90%\"> ");
+document.write("<tr><td width=80>"+sAnchorText+"<td><input name=txtTitle style=\"width:320px;\" onchange=\"form1.btnApply.disabled=false\"> ");
+document.write("<input id=txtHtml type=hidden> ");
+document.write("<tr><td width=80>"+sAnchorHref+"<td><input name=txtHref style=\"width:280px;\"  onchange=\"form1.btnApply.disabled=false\">");
+document.write("<input type=button name=btnSelectHref value=\""+sBtnSelectHref+"\" disabled style=\"width:40px;height:22px;\" onclick=\"btnSelectHref_onclick()\">");
+document.write("<tr><td>"+sTdSource+"<td><input type=radio name=rdoHref id=rdoHrefCustom onclick=\"rdoHrefCustom_onclick()\"><label for=rdoHrefCustom>"+sHrefManual+"</label>&nbsp;");
+document.write("<input type=radio name=rdoHref checked id=rdoHrefUpload onclick=\"rdoHrefUpload_onclick()\"><label for=rdoHrefUpload>"+sHrefLocal+"</label>&nbsp;");
+for(var i=0;i<aOtherHrefRadio.length;i+=2){
+	document.write("<input type=radio name=rdoHref id="+aOtherHrefRadio[i]+" onclick=\"otherHrefRadio_onclick('"+aOtherHrefRadio[i]+"')\"><label for="+aOtherHrefRadio[i]+">"+aOtherHrefRadio[i+1]+"</label>&nbsp;");
+}
+document.write("<tr id=trUpload height=100><td>&nbsp;<td valign=top> ");
+document.write("	<table id=tblUpload style=\"display:none;\"><tr><td>"+sSelectFile+"<input type=file name=txtFile style=width:250px; onkeydown=\"event.returnValue=false\" oncontextmenu=\"return false\" onfocus=txtFile_onfocus() onclick=this.onfocus()> ");
+document.write("	<tr id=trUnzip><td><input type=checkbox id=chkUnzip name=chkUnzip onclick=chkUnzip_onclick()><label for=chkUnzip>"+sZipLabel+"</label> ");
+document.write("	<tr id=trMainFile style=display:none><td>&nbsp;&nbsp;&nbsp;&nbsp;"+sIndexFile+"<input name=txtMainFile style=width:150px;> ");
+document.write("	</table> ");
+document.write("<tr height=30><td>"+sTargetWin+"<td><select name=selTarget onchange=\"selTarget_onchange()\"><option value=\"_self\">"+sTargetSelf+"<option value=\"_blank\" selected>"+sTargetNew+"</select>&nbsp;<input style=\"display:none\" value=\"_self\" name=txtTarget style=\"width:60px\" onchange=\"form1.btnApply.disabled=false\"> ");
+document.write("</table> ");
+document.write("<hr> ");
+document.write("<div align=right style=\"margin-top:0px;padding-right:20px;\"> ");
+document.write("<input type=button value=\""+sOk+"\" id=btnOK onclick=\"bCloseTop=true;doOK()\"> ");
+document.write("<input type=button value=\""+sCancel+"\" id=btnCancel onclick=\"$api.win.close()\"> ");
+document.write("<input type=button value=\""+sApply+"\" id=btnApply onclick=\"bCloseTop=false;doOK()\" style=\"display:none\" disabled> ");
+document.write("</div> ");
+document.write(" ");
+document.write("</FORM> ");
+document.write("<iframe src=\"\" name=\"w_hidden\" id=\"w_hidden\" style=\"display:none\"></iframe> ");
+//-->
+</SCRIPT>
+</BODY>
+</HTML>

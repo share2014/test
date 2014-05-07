@@ -1,0 +1,69 @@
+<!-- /*
+*Usage:loaded at local wapper, should use function in $wapper.api
+*/ -->
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<title></title>
+<SCRIPT LANGUAGE="JavaScript" src="_web_api.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+//此处不在应用下面获取到的_gap_是web_api的目录，因此要加载应用的_global.js才有$fn
+if($wapper.api.getQueryString("system_owner_app","")!=$api._libaray_path&&$wapper.api.getQueryString("system_owner_app","")!="") {
+    $api._gap_ = $wapper.api.getQueryString("system_owner_app",$api._libaray_path);
+    $wapper.api.include($api._gap_+"/_global");
+}
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var sPlugInJs = $wapper.api.getQueryString("plug_in_js","");
+if(sPlugInJs!="") {
+    $wapper.api.include(sPlugInJs);
+}
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function setMenuBG(nTry){
+	nTry++;
+	if($api.fn._IE()||nTry>20){
+		return;
+	}
+	try{
+		var oDOM=window.frames[0].document;
+		if(oDOM&&oDOM.body.bgColor==""){
+			window.setTimeout("setMenuBG("+nTry+")",500);
+		}
+		else if(oDOM&&oDOM.body.bgColor=="#0e0000"){
+			oDOM.body.bgColor="#D4D0C8";
+		}
+	}
+	catch(e){
+		window.setTimeout("setMenuBG("+nTry+")",500);
+	}
+}
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" event=onload for=window>
+<!--
+window.setTimeout("setMenuBG(0);",500);
+//-->
+</SCRIPT>
+</HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var sUrl=$wapper.api.getQueryString("url","");
+sUrl=$wapper.api.setQueryString("system_owner_app",$wapper.api.getQueryString("system_owner_app"),sUrl);
+sUrl=$wapper.api.setQueryString("random_param_key",""+Math.random(),sUrl);
+
+document.write("<frameset rows=\"*,0\" border=0>");
+document.write("<frame src=\""+$api.fn.formatFileName(sUrl,"/")+"\"> ");
+document.write("</frameset>");
+
+window.document.title=$wapper.api.getQueryString("title","User Dialog");
+
+//-->
+</SCRIPT>
+</HTML>

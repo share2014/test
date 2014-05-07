@@ -1,0 +1,88 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>特殊符号</TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="../web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper.api.include("dialog");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var oCurTD=null;
+var sChar="＃,＠,＆,＊,※,§,〃,№,〓,○,●,△,▲,◎,☆,★,◇,◆,□,■,▽,▼,㊣,℅,ˉ,￣,＿,﹉,﹊,﹍,﹎,﹋,﹌,﹟,﹠,﹡,♀,♂,⊕,⊙,↑,↓,←,→,↖,↗,↙,↘,∥,∣,／,＼,∕,﹨,€,&yen;,&pound;\n";
+sChar+="，,、,。,．,；,：,？,！,︰,…,‥,′,‵,々,～,‖,ˇ,ˉ,﹐,﹑,﹒,·,﹔,﹕,﹖,﹗,｜,-,︱,-,︳,︴,﹏,（,）,︵,︶,｛,｝,︷,︸,〔,〕,︹,︺,【,】,︻,︼,《,》,︽,︾,〈,〉,︿,﹀,「,」,﹁,﹂,『,』,﹃,﹄,﹙,﹚,﹛,﹜,﹝,﹞,',',\",\",〝,〞,ˋ,ˊ\n";
+sChar+="≈,≡,≠,＝,≤,≥,＜,＞,≮,≯,∷,±,＋,－,×,÷,／,∫,∮,∝,∞,∧,∨,∑,∏,∪,∩,∈,∵,∴,⊥,∥,∠,⌒,⊙,≌,∽,√,≦,≧,≒,≡,﹢,﹣,﹤,﹥,﹦,～,∟,⊿,㏒,㏑\n";
+sChar+="°,′,″,＄,￥,〒,￠,￡,％,＠,℃,℉,﹩,﹪,‰,﹫,㏕,㎜,㎝,㎞,㏎,㎡,㎎,㎏,㏄,°,○,¤\n";
+sChar+="ⅰ,ⅱ,ⅲ,ⅳ,ⅴ,ⅵ,ⅶ,ⅷ,ⅸ,ⅹ,Ⅰ,Ⅱ,Ⅲ,Ⅳ,Ⅴ,Ⅵ,Ⅶ,Ⅷ,Ⅸ,Ⅹ,Ⅺ,Ⅻ,⒈,⒉,⒊,⒋,⒌,⒍,⒎,⒏,⒐,⒑,⒒,⒓,⒔,⒕,⒖,⒗,⒘,⒙,⒚,⒛,⑴,⑵,⑶,⑷,⑸,⑹,⑺,⑻,⑼,⑽,⑾,⑿,⒀,⒁,⒂,⒃,⒄,⒅,⒆,⒇,①,②,③,④,⑤,⑥,⑦,⑧,⑨,⑩,㈠,㈡,㈢,㈣,㈤,㈥,㈦,㈧,㈨,㈩\n";
+sChar+="ā,á,ǎ,à,ō,ó,ǒ,ò,ē,é,ě,è,ī,í,ǐ,ì,ū,ú,ǔ,ù,ǖ,ǘ,ǚ,ǜ,ü,ê,ɑ,,ń,ň,,ɡ";
+
+var aRemark="特殊符号,标点符号,数学符号,单位,数字,拼音".split(",");
+var aChar=sChar.split("\n");
+var sSel="<select id=selChar onchange=selChar_onchange()>";
+for(var i=0;i<aRemark.length;i++){
+	sSel+="<option value=\""+aChar[i]+"\">"+aRemark[i];
+}
+sSel+="</select>";
+
+function selChar_onchange(){
+	var a=selChar.value.split(",");
+	var sHtml="<table cellspacing=1 cellpadding=3 bgcolor=black onselectstart=\"return false\">";
+	for(var i=0;i<84;i++){
+		if((i%12)==0){
+			sHtml+="<tr>";
+		}
+		if(i<a.length){
+			sHtml+="<td bgcolor=white width=16 height=16 style=\"cursor:hand\" onclick=selectTD(this) ondblclick=doOK()>"+a[i];
+		}
+		else{
+			sHtml+="<td bgcolor=white width=16 height=16>&nbsp;";
+		}
+	}
+	sHtml+="</table>";
+	tdChars.innerHTML=sHtml;
+	oCurTD=null;
+}
+
+function selectTD(oTD){
+	if(oCurTD){
+		oCurTD.style.backgroundColor="white";
+	}
+	oTD.style.backgroundColor="#c0c0c0";
+	oCurTD=oTD;
+}
+
+function window_onload(){
+	selChar_onchange();
+}
+
+function doOK(){
+	if(oCurTD==null){
+		alert("请选择字符！");
+		return;
+	}
+	setReturnValue(oCurTD.innerHTML);
+	$api.win.close();
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY bgcolor="#F0F0F0" scroll=no onload="window_onload()">
+<table align=center>
+<tr><td><table><tr><td>请选择：<td>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+document.write(sSel);
+//-->
+</SCRIPT>
+</table>
+<tr><td colspan=2 id=tdChars>&nbsp;
+</table>
+<hr>
+<div align=right>
+	<input type=button value="确 定" onclick="doOK()">&nbsp;
+	<input type=button value="取 消" onclick="$api.win.close()">&nbsp;
+</div>
+</BODY>
+</HTML>

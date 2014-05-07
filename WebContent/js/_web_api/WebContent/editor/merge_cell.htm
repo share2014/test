@@ -1,0 +1,56 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="../web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper.api.include("dialog");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function window_onload(){
+}
+
+function doOK(){
+	var sRet="";
+	if(chkDirectionX.checked){
+		if(isNaN(txtMergeX.value)||txtMergeX.value==""){
+			alert("请输入需要合并的列数！");
+			return;
+		}
+		sRet+=txtMergeX.value;
+	}
+	else{
+		sRet+="0";
+	}
+	sRet+="\n";
+	if(chkDirectionY.checked){
+		if(isNaN(txtMergeY.value)||txtMergeY.value==""){
+			alert("请输入需要合并的行数！");
+			return;
+		}
+		sRet+=txtMergeY.value;
+	}
+	else{
+		sRet+="0";
+	}
+	setReturnValue(sRet);
+	$api.win.close();
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload()" bgcolor="#F0F0F0" style="margin:0;overflow:hidden">
+<table align=center>
+<tr><td><input type=checkbox id=chkDirectionX><label for=chkDirectionX>向右合并<input id=txtMergeX style="width:40px;text-align:center;" value=1 maxlength=2>列</label>
+<tr><td><input type=checkbox id=chkDirectionY><label for=chkDirectionY>向下合并<input id=txtMergeY style="width:40px;text-align:center;" value=1 maxlength=2>行</label>
+</table>
+<hr>
+<div align=right style="padding-top:12px;padding-right:20px">
+<input type=button value="确 定" onclick=doOK()>
+<input type=button value="取 消" onclick="$api.win.close();">
+</div>
+</BODY>
+</HTML>

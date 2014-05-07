@@ -1,0 +1,38 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<TITLE></TITLE>
+<SCRIPT language=javascript src="web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var aSize=$wapper.api.getQueryString("size_str","").split("\n");
+var aStretchURL=$wapper.api.getQueryString("stretch_url","").split("\n");
+
+function getImageWidth(index){
+	return aSize[2*index];
+}
+
+function getImageHeight(index){
+	return aSize[2*index+1];
+}
+
+function getStretchURL(index){
+	return aStretchURL[index];
+}
+
+function window_onload(){
+	var sScript=$wapper.api.getQueryString("script","");
+	if(sScript==""){
+		sScript="parent.afterFileAction();"
+	}
+	//window.execScript(sScript);
+	eval(sScript);
+}
+
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload()">
+
+</BODY>
+</HTML>

@@ -1,0 +1,401 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="../web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper._language_new_version=null;
+$wapper.win_remark = "$api.win.frames[0]";
+
+$wapper.api.include("files_web,dialog,./media,language");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bUploaded=false;
+var sMediaSrc="";
+var nWidthToHeight=1;
+
+var writeSrcControl=null;
+var writeSrcType=null;
+var onSrcTypeSelect=null;
+var getOtherTypeSrc=null;
+
+//2009-10-6 by mis
+var SND_EXT=";MID;MIDI;WAV;MP3;MP4;WMA;";
+var bInternetURLAvaiable=true;
+var bHideSndCtrlParams=false;
+
+function doOK(){
+    $wp.id("btnOK").disabled=true;
+	if(!bUploaded&&form1.rdoSource[0].checked){
+		doUpload();
+		return;
+	}
+	if(form1.txtWidth.value==""){
+		doPreview();
+		checkMediaOK(0);
+	}
+	else{
+		window.setTimeout("doOK2()",500);
+	}
+}
+
+function doOK2(){
+	var sRet=getDesignHtmlOfMedia();
+	if(sRet==null){
+		alert("请选择音视频或者Flash文件！");
+		$wp.id("btnOK").disabled=false;
+		return;
+	}
+	setReturnValue(sRet);
+	$api.win.close();
+}
+
+function checkMediaOK(nTime){
+	var sSrc=getMediaSrc();
+	if(!checkMediaFile(sSrc)){
+		alert("请选择音视频或者Flash文件！");
+		return;
+	}
+	if(window.navigator.appVersion.indexOf("MSIE")==-1){
+		form1.txtWidth.value="120";
+		form1.txtHeight.value="60";
+	}
+	if(nTime<10&&form1.txtWidth.value==""){
+		nTime++;
+		window.setTimeout("checkMediaOK("+nTime+")","100");
+	}
+	else{
+		doOK2();
+	}
+}
+
+function doUpload(){
+	if(!checkMediaFile($api.fn.getLocalFilePath(form1.txtFile))){
+		alert(sPleaseSelectMediaFile);
+		return;
+	}
+	var sFolder=$wapper.api.getQueryString("folder","folder");
+	form1.action=getUploadAction($wapper.api.getQueryString("files_web"),"folder="+(sFolder?sFolder:"")+"&script=parent.afterUpload()");
+	form1.submit();
+}
+
+function afterUpload(nTry){
+	if(w_hidden.getFileCount()!=1||w_hidden.getLastError()){
+		alert(w_hidden.getLastError());
+		return;
+	}
+	var sFileUrl = w_hidden.getFileURL(0);
+	if(sFileUrl.toLowerCase().indexOf("http://")==-1){
+		sFileUrl = "http://"+$api.fn.formatFileName(window.location.host+"/"+sFileUrl,"/");
+	}
+	sMediaSrc=sFileUrl;
+	//doPreview();
+	bUploaded=true;
+	doOK();
+}
+
+function checkMediaFile(sSrc){
+	var sExt=$api.fn.getFileExtName(sSrc);
+	if(";SWF;FLV;RM;RAM;RMVB;MIDI;AVI;RMI;MID;ASF;WM;WMV;WMA;WAV;SND;AU;ASX;ASF;M3U;MPEG;MPG;MP3;MP2;MP4;".indexOf(";"+sExt.toUpperCase()+";")==-1){
+		return false;
+	}
+	return true;
+}
+
+function getMediaSrc(){
+	var sSrc="";
+	if(document.getElementById("rdoSource1").checked){
+		sSrc=sMediaSrc;
+	}
+	else if(document.getElementById("rdoSource2").checked){
+		sSrc=form1.txtInternetURL.value;
+	}
+	else if(getOtherTypeSrc!=null){
+		sSrc=getOtherTypeSrc();
+	}
+	return sSrc;
+}
+
+function doPreview(){
+	//2009-10-6 by mis
+	var sExt=$api.fn.getFileExtName(getMediaSrc()).toUpperCase();
+	if(SND_EXT.indexOf(";"+sExt+";")!=-1){
+		form1.txtWidth.value=322;
+		form1.txtHeight.value=69;
+		form1.chkSize.disabled=true;
+		form1.txtWidth.disabled=true;
+		form1.txtHeight.disabled=true;
+	}
+	else if(sExt=="FLV"||sExt=="SWF"){
+		form1.txtWidth.value=320;
+		form1.txtHeight.value=240;
+		form1.chkSize.disabled=false;
+		form1.txtWidth.disabled=false;
+		form1.txtHeight.disabled=false;	    
+	}
+	else{
+		form1.chkSize.disabled=false;
+		form1.txtWidth.disabled=false;
+		form1.txtHeight.disabled=false;
+	}
+	refreshControlParams();
+	//2009-10-6 by mis
+	var sSrc="";
+	if(sExt=="SWF"||sExt=="FLV"){
+		form1.chkShowControl.disabled=true;
+	}
+	else if(sExt=="RM"||sExt=="RAM"||sExt=="RMVB"){
+		form1.chkShowControl.disabled=true;
+	}
+	else if(sExt=="RM"||sExt=="RAM"||sExt=="RMVB"){
+		form1.chkShowControl.disabled=true;
+	}
+	else{
+		form1.chkShowControl.disabled=false;	
+	}
+	divPreview.innerHTML=getDisplayHtmlOfMedia(getMediaSrc(),form1.chkAutoStart.checked,form1.chkLoop.checked,form1.chkShowControl.checked,form1.txtWidth.value,form1.txtHeight.value,true);
+	form1.chkSize.checked=true;
+	window.setTimeout("chkSize_onclick()",500);
+}
+function onUploadMediaChange(){
+	if(form1.txtFile.value==""){
+		return;
+	}
+	sMediaSrc=$api.fn.getLocalFilePath(form1.txtFile);
+	doPreview();
+}
+
+function chkSize_onclick(){
+	if(divPreview.firstChild==null){
+		return;
+	}
+	if(!form1.chkSize.checked){
+		divPreview.firstChild.removeAttribute("width");
+		divPreview.firstChild.removeAttribute("height");
+	}
+	if(divPreview.firstChild!=null&&divPreview.firstChild.offsetWidth){
+		form1.txtWidth.value=divPreview.firstChild.offsetWidth;
+		form1.txtHeight.value=divPreview.firstChild.offsetHeight;
+	}
+	form1.txtWidth.disabled=!form1.chkSize.checked;
+	form1.txtHeight.disabled=!form1.chkSize.checked;
+	form1.chkWidthHeight.disabled=!form1.chkSize.checked;
+	nWidthToHeight=form1.txtHeight.value/form1.txtWidth.value;
+	if(isNaN(nWidthToHeight)){
+		nWidthToHeight=1;
+	}
+	//2009-10-6 by mis
+	var sExt=$api.fn.getFileExtName(getMediaSrc()).toUpperCase();
+	if(SND_EXT.indexOf(";"+sExt+";")!=-1){
+		form1.txtWidth.value=322;
+		form1.txtHeight.value=69;
+		form1.chkSize.disabled=true;
+		form1.txtWidth.disabled=true;
+		form1.txtHeight.disabled=true;
+		form1.chkAutoStart.disabled=true;
+		form1.chkLoop.disabled=true;
+		form1.chkShowControl.disabled=true;
+	}
+	else{
+		form1.chkSize.disabled=false;
+		form1.txtWidth.disabled=false;
+		form1.txtHeight.disabled=false;
+		form1.chkAutoStart.disabled=false;
+		form1.chkLoop.disabled=false;
+		form1.chkShowControl.disabled=false;
+	}
+}
+
+function txtWidth_onkeyup(){
+	if(isNaN(form1.txtWidth.value)){
+		form1.txtWidth.value="";
+	}
+	if(form1.chkWidthHeight.checked&&form1.txtWidth.value!=""){
+		form1.txtHeight.value=Math.floor(form1.txtWidth.value*nWidthToHeight);
+	}
+	resetWidthHeight();
+}
+
+function txtHeight_onkeyup(){
+	if(isNaN(form1.txtHeight.value)){
+		form1.txtHeight.value="";
+	}
+	if(form1.chkWidthHeight.checked&&form1.txtHeight.value!=""){
+		form1.txtWidth.value=Math.floor(form1.txtHeight.value/nWidthToHeight);
+	}
+	resetWidthHeight();
+}
+
+function resetWidthHeight(){
+	if(divPreview.firsetChild!=null){
+		if(!isNaN(form1.txtWidth.value)&&form1.txtWidth.value!=""&&parseInt(form1.txtWidth.value)>0){
+			divPreview.firstChild.width=form1.txtWidth.value;
+		}
+		if(!isNaN(form1.txtHeight.value)&&form1.txtHeight.value!=""&&parseInt(form1.txtHeight.value)>0){
+			divPreview.firstChild.height=form1.txtHeight.value;
+		}
+	}
+}
+
+function getDesignHtmlOfMedia(){
+	if(getMediaSrc()=="http://"||getMediaSrc()=="file://"||getMediaSrc()==""||getMediaSrc()==null){
+		alert(sPleaseSelectMediaSource);
+		return null;
+	}
+	var sExt=$api.fn.getFileExtName(getMediaSrc()).toUpperCase();
+	var sSrc="";
+	if(sExt=="SWF"||sExt=="FLV"){
+		sSrc=$wapper.api.getAbsolutePath("../images/flash.png");
+	}
+	else if(SND_EXT.indexOf(";"+sExt+";")!=-1){
+		sSrc=$wapper.api.getAbsolutePath("../images/sound.png");
+	}
+	else{
+		sSrc=$wapper.api.getAbsolutePath("../images/video.png");
+	}
+	var sHtml="<img IsMedia=\"1\" style=\""+(window.navigator.appVersion.indexOf("MSIE")==-1?"":"display:none")+"\" src=\""+sSrc+"\" MediaSrc=\""+getMediaSrc()+"\" width=\""+form1.txtWidth.value+"\" height=\""+form1.txtHeight.value+"\" AutoStartMedia=\""+(form1.chkAutoStart.checked?"1":"0")+"\" LoopPlay=\""+(form1.chkLoop.checked?"1":"0")+"\" ShowPlayControl=\""+(form1.chkShowControl.checked?"1":"0")+"\">";
+	return sHtml;
+}
+
+function window_onload(){
+	$wapper.api.doLanguageBinding("td_source,lbl_local,lbl_internet,td_loop,lbl_auto_start,lbl_loop,lbl_show_control,td_size,lbl_limit_size,td_width,td_height,lbl_lock_size,btn_ok,btn_cancel");
+	var oImg=null;
+	if($wapper.api.getQueryString("object_id","")!=""){
+		oImg=$api.win.dialogArguments.getEditorDOM().getElementById($wapper.api.getQueryString("object_id",""));
+	}
+	if(oImg){
+		form1.rdoSource[1].checked=true;
+		form1.txtInternetURL.value=oImg.getAttribute("MediaSrc");
+		sMediaSrc=oImg.getAttribute("MediaSrc");
+		form1.chkAutoStart.checked=(oImg.getAttribute("AutoStartMedia")=="1");
+		form1.chkLoop.checked=(oImg.getAttribute("LoopPlay")=="1");
+		form1.chkShowControl.checked=(oImg.getAttribute("ShowPlayControl")=="1");
+		form1.chkSize.checked=true;
+		form1.txtWidth.value=oImg.width;
+		form1.txtHeight.value=oImg.height;
+		doPreview();
+	}
+	rdoSource_onclick();
+	refreshControlParams();
+}
+
+function rdoSource_onclick(nIndex){
+	if(nIndex==null||nIndex==-1){
+		for(var i=1;i<=2;i++){
+			if(document.getElementById("rdoSource"+i).checked){
+				nIndex=i;
+				break;
+			}
+		}
+	}
+	document.getElementById("divSource1").style.display="none";
+	document.getElementById("divSource2").style.display="none";
+	if(nIndex<=2){
+		document.getElementById("divSource"+nIndex).style.display="";
+	}
+	if(onSrcTypeSelect!=null){
+		onSrcTypeSelect(nIndex);
+	}
+	//2009-11-6 by mis
+	if(!bInternetURLAvaiable){
+		form1.btnSetInternetURL.style.display="none"
+		form1.txtInternetURL.style.width="250";
+		if(form1.txtInternetURL.value!=""){
+			spanUpload.style.display="";
+		}
+		spanSourceType.style.display="none";
+	}
+}
+
+function chkUpload_onclick(){
+	if(form1.chkUpload.checked){
+		document.getElementById("rdoSource1").checked=true;
+		rdoSource_onclick(1);
+	}
+	else{
+		document.getElementById("rdoSource2").checked=true;
+		rdoSource_onclick(2);
+	}
+}
+
+function refreshControlParams(){
+	var bVisible=true;
+	if(bHideSndCtrlParams){
+		var sExt=$api.fn.getFileExtName(getMediaSrc()).toUpperCase();
+		if(SND_EXT.indexOf(";"+sExt+";")!=-1||sExt==""){
+			bVisible=false;
+		}
+
+	}
+	trPlayControl1.style.display=(bVisible?"":"none");
+	trPlayControl2.style.display=(bVisible?"":"none");
+	trPlayControl3.style.display=(bVisible?"":"none");
+	trPlayControl4.style.display=(bVisible?"none":"");
+	trPlayControl4.style.height=(bVisible?"10":"120");
+}
+
+	
+
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var sMediaSrcJS=$wapper.api.getQueryString("media_src_js","");
+if(sMediaSrcJS!=""){
+	$wapper.api.include(sMediaSrcJS);
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload=window_onload() bgcolor="#E0E0E0" style="margin:0;" scroll=no>
+<form target="w_hidden" ENCTYPE="multipart/form-data" method="post" name="form1">
+<table align=center>
+<tr><td width=240 height=240>
+	<div id=divPreview style="width:240;height:240;border:inset 2px;background:white;overflow:auto;">&nbsp;</div>
+<td valign=top>
+	<table>
+	<tr><td id=tdSource>来源：<td><div id=divSource1><input name="txtFile" type="file" style="width:250px;" onkeydown="event.returnValue=false" oncontextmenu="return false"  onchange="onUploadMediaChange(this)"></div>
+					<div id=divSource2 style="display:none"><input name="txtInternetURL" type="text" style="width:210px;"><input type=button id=btnSetInternetURL name=btnSetInternetURL style="width:40px;height:22px" value="设定" onclick="doPreview()"></div>
+					<SCRIPT LANGUAGE="JavaScript">
+					<!--
+					if(writeSrcControl!=null){
+						writeSrcControl();
+					}
+					//-->
+					</SCRIPT>
+	<tr><td>&nbsp;<td><span id=spanSourceType><input type=radio name=rdoSource id=rdoSource1 checked onclick="rdoSource_onclick(1)"><label for=rdoSource1 id=lblLocal>自本地</label>&nbsp;
+								<input type=radio name=rdoSource id=rdoSource2 onclick="rdoSource_onclick(2)"><label for=rdoSource2 id=lblInternet>自Internet</label>&nbsp;
+							</span>
+						<span id=spanUpload style=display:none style="padding-bottom:8px"><input type=checkbox id=chkUpload name=chkUpload onclick=chkUpload_onclick()><label for=chkUpload>从本地上传文件</label></span>
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+								if(writeSrcType!=null){
+									writeSrcType("rdoSource");
+								}
+								//-->
+								</SCRIPT>
+	<tr id=trPlayControl1 style="display:none"><td id=tdLoop>播放：<td><input type=checkbox id=chkAutoStart name=chkAutoStart><label for=chkAutoStart id=lblAutoStart>加载时自动播放</label>&nbsp;
+					<input type=checkbox id=chkLoop name=chkLoop><label for=chkLoop id=lblLoop>循环播放</label>
+	<tr id=trPlayControl2 style="display:none"><td>&nbsp;<td><input type=checkbox id=chkShowControl name=chkShowControl checked><label for=chkShowControl id=lblShowControl>显示控制台</label>
+	<tr id=trPlayControl3 style="display:none"><td id=tdSize>尺寸：<td><fieldset style="padding:5px;">
+					<legend><input type=checkbox id=chkSize onclick=chkSize_onclick()><label for=chkSize id=lblLimitSize>限定尺寸</label></legend>
+					<table>
+					<tr><td id=tdWidth>宽：<td><input name=txtWidth style="width:40px;" value="" disabled onkeyup=txtWidth_onkeyup()><td>&nbsp;<span id=tdHeight>高：</span><td><input name=txtHeight style="width:40px;" disabled onkeyup=txtHeight_onkeyup() value="">
+					<tr><td>&nbsp;<td colspan=3><input type=checkbox id=chkWidthHeight name=chkWidthHeight checked disabled><label for=chkWidthHeight id=lblLockSize>按比例缩放</label>
+					</table>
+					</fieldset>
+	<tr id=trPlayControl4 style="display:none"><td><td><font color=gray>请选择媒体文件，点击“确定”按钮</font>
+	<tr><td colspan=2 align=right>
+		<p>&nbsp;</p>
+		<hr>
+		<input type=button value="确 定" id="btnOk" style="width:60px" onclick="doOK()">
+		<input type=button value="取 消" id="btnCancel" style="width:60px" onclick="$api.win.close()">
+	</table>
+</table>
+</form>
+<iframe name="w_hidden" id="w_hidden" style="width:100%;height:200px;display:none"></iframe>
+</BODY>
+</HTML>

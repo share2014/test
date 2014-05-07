@@ -1,0 +1,145 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="/_web_api/web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+if($api.lang.sLanguage&&$api.lang.sCountry){
+	$wapper.api.includeLangBundle("_import_step4",top.getQueryString("system_owner_app"));
+}
+else{
+	$wapper.api.includeLangBundle("_import_step4");
+}
+var sTipImporting="正在导入数据，请稍候......";//<img src=\"\" align=absmiddle>
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bImportFromDB=(top.getQueryString("db_import","0")=="1");
+
+function window_onload(){
+	if(window.navigator.appVersion.indexOf("MSIE")==-1){
+		document.body.bgColor="lightgray";
+	}
+	if($api.lang.sLanguage&&$api.lang.sCountry){
+		$wapper.api.doLanguageBinding("span_wizard,btn_finish");
+	}
+	if(top.getQueryString("version")!="2"){
+		txtLogs.value=parent.w_hidden.txtLogs.value;
+	}
+	else{
+		var sAction=$wapper.api.getQueryString("action");
+		sAction=$wapper.api.setQueryString("file",$wapper.api.getQueryString("csv_file"),sAction);
+		sAction=$wapper.api.setQueryString("labeled",$wapper.api.getQueryString("labeled"),sAction);
+		//alert("csv_fields="+$wapper.api.getQueryString("csv_fields"))
+		sAction=$wapper.api.setQueryString("csv_fields",$wapper.api.getQueryString("csv_fields"),sAction);
+		//sAction=$wapper.api.setQueryString("_no_http_cache","1",sAction);
+		sAction=$wapper.api.setQueryString("script","parent.w_main.btnFinish.disabled=false",sAction);
+		var aField=top.getQueryString("fields","").split(",");
+		var sFields="";
+		for(var i=0;i<aField.length;i+=2){
+			sFields+=(i==0?"":",")+aField[i+1];
+		}
+		//alert("original_fields="+sFields)
+		sAction=$wapper.api.setQueryString("original_fields",sFields,sAction);
+		if(bImportFromDB||parent.bUseUTF8) {
+			sAction=$wapper.api.setQueryString("charset","UTF-8",sAction);
+		}
+		//window.open(sAction);
+		btnFinish.disabled=true;
+		//parent.w_hidden.location.href=sAction;
+		postURL(sAction,parent.w_hidden);
+	}
+	top.returnValue="1";
+}
+
+function doOK(bDeleted) {
+    if(bDeleted==null) bDeleted=false;
+    var sCSVFile=$wapper.api.getQueryString("csv_file","");
+	   // alert(sCSVFile+"--"+bDeleted)
+	if(sCSVFile!=""&&!bDeleted){
+		parent.w_hidden.location = $fn.getFilesWeb()+"/servlet/com.lemon.files.DeleteAction?file="+$api.fn.encodeURL(sCSVFile)+"&url_pre="+$api.fn.encodeURL($fn.getFilesWeb())+"&script=parent.w_main.doOK(true)&"+Math.random();//,"_blank","width=200,height=160,left=1800,top=1800"
+		return;
+	}
+    try {
+	    if(top.getQueryString("refresh","0")=="1") {
+			if(top.opener) {
+				top.opener.location.href = $wapper.api.setQueryString("r",Math.random(),top.opener.location.href);
+			}
+		}
+		top.bClose=true;
+	}catch(e){}
+
+    top.close();
+}
+
+function postURL(sUrl,oWin){
+	var aParam=$wapper.api.getURLParams(sUrl).split("&");
+	var oForm=document.getElementById("form_post_url");
+	if(oForm==null){
+		var oDIV=document.createElement("DIV");
+		oDIV.innerHTML+="<form id=form_post_url name=form_post_url style=\"display:none;\"></form>";
+		if(document.body.childNodes.length==0){
+			document.body.appendChild(oDIV);
+		}
+		else{
+			document.body.insertBefore(oDIV,document.body.firstChild);
+		}
+		oForm=document.getElementById("form_post_url");
+	}
+	var sFormHTML="";
+	for(var i=0;i<aParam.length;i++){
+		var nPos=aParam[i].indexOf("=");
+		if(nPos==-1){
+			continue;
+		}
+		var sKey=aParam[i].substring(0,nPos);
+		var sValue=$api.fn.decodeURL(aParam[i].substring(nPos+1));
+		sFormHTML+="<input name="+sKey+" value=\""+sValue.replace(/\"/g,"&quot;")+"\">";
+	}
+	oForm.innerHTML=sFormHTML;
+	oForm.action=$wapper.api.getURLPathName(sUrl);
+	oForm.method="post";
+	oForm.target=oWin.name;
+	oForm.submit();
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload()" bgcolor=menu style="margin:0" scroll=no>
+<div style="background:white;">
+	<table width="100%"><tr><td style="padding-left:20px;padding-top:4px;" valign="top">
+	<SCRIPT LANGUAGE="JavaScript">
+	<!--
+	var sRemark=top.getQueryString("remark");
+	var nPos=sRemark.indexOf("：");
+	if(nPos!=-1){
+		sRemark="<span style=\"line-height:30px;\"><b>"+sRemark.substring(0,nPos)+"</b></span><br>&nbsp;&nbsp;"+sRemark.substring(nPos+1);
+	}
+	else{
+		sRemark="<span style=\"line-height:30px;\"><b><span id=spanWizard>数据导入向导</span</b></span><br>&nbsp;&nbsp;"+sRemark;
+	}
+	document.write(sRemark);
+	//-->
+	</SCRIPT>
+	<td width=80>
+		<img src="images/import.gif" align=absmiddle>
+	</table>
+</div>
+	<p>&nbsp;</p>
+	<table align=center height=270 width="90%">
+	<tr><td>
+	<textarea id=txtLogs style="width:100%;height:100%;overflow:auto;background:menu;padding:12px;" readonly></textarea>
+	<SCRIPT LANGUAGE="JavaScript">
+	<!--
+	txtLogs.value=sTipImporting;
+	//-->
+	</SCRIPT>
+	</table>
+<div align=right style="margin-top:10px;padding-right:60px;">
+	<input type=button id=btnFinish value="完 成" onclick="doOK()"  style="width:60px">
+</div>
+
+</BODY>
+</HTML>

@@ -1,0 +1,263 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<style>
+a.date_select{color:black;text-decoration:none}
+a.date_select:hover{color:red;text-decoration:underline}
+</style>
+<SCRIPT LANGUAGE=javascript src="web_api_wapper.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper.api.include("language,dialog");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var oDateNow=new Date();
+var oDateSelected=new Date();
+var oDateIn=null;
+
+var nTempYear=0;
+var nTempMonth=0;
+var nSelDate=0;
+
+var sTimeFormat=$wapper.api.getQueryString("time_format","HH24:MI:SS");
+
+var bMSIE=$api.fn._IE();
+
+function getDaysOfMonth(nYear,nMonth){
+	if(nMonth==2){
+		return (isLeapYear(nYear,nMonth)?29:28);
+	}
+	if(nMonth==1||nMonth==3||nMonth==5||nMonth==7||nMonth==8||nMonth==10||nMonth==12){
+		return 31;
+	}
+	return 30;
+}
+
+function isLeapYear(nYear){
+	if(!bMSIE){
+		nYear+=1900;
+	}
+	return ((nYear%4)==0&&(nYear%100)!=0)||((nYear%400)==0);
+}
+
+function getDatePanel(nYear,nMonth){
+	var aWeekday=sWeekday.split(" ");
+	var sTable="<table bgcolor=#c0c0c0 cellpadding=0 cellspacing=1><tr bgcolor=#e0e0e0>";
+	for(var i=0;i<7;i++){
+		sTable+="<td align=center>"+aWeekday[i];
+	}
+	var nDays=getDaysOfMonth(nYear,nMonth);
+	var oDate=new Date();
+	oDate.setYear(nYear+(bMSIE?0:1900));
+	oDate.setDate(1);
+	oDate.setMonth(nMonth-1);
+
+	var nBeginDay=oDate.getDay();
+	var nCol=nBeginDay,nRow=0;
+	if(nBeginDay==7){
+		nBeginDay=0;
+	}
+	for(var i=0;i<nBeginDay;i++){
+		if(i==0){
+			sTable+="<tr>";
+			nRow++;
+		}
+		sTable+="<td width=20 bgcolor=#ffffff style=\"border:solid #ffffff 1px\">&nbsp;";
+	}
+	for(var i=0;i<nDays;i++){
+		if((nCol%7)==0){
+			sTable+="<tr>";
+			nRow++;
+			nCol=0;
+		}
+		var sColor="#000000";
+		if(nCol==0){
+			sColor="#990000";
+		}
+		if(nCol==6){
+			sColor="#009900";
+		}
+		sTable+="<td width=20 bgcolor=#ffffff style=\"color:"+sColor+";cursor:"+(bMSIE?"hand":"pointer")+";border:solid #ffffff 1px\" OriginalColor=\""+sColor+"\" align=center onmouseover=dateTd_onmouseover(this) onmouseout=dateTd_onmouseout(this) onclick=selectDateTD(this);doOK() id=td_"+(i+1)+"> "+(i+1);
+		//onmouseover=\"this.style.textDecoration='underline';\" onmouseout=\"this.style.textDecoration='none'\" onclick
+		nCol++;
+	}
+	while(true){
+		if((nCol%7)==0){
+			nRow++;
+			if(nRow==7){
+				break;
+			}
+			sTable+="<tr>";
+			nCol=0;
+		}
+		sTable+="<td  width=20 bgcolor=#ffffff style=\"border:solid #ffffff 1px\">&nbsp;";
+		nCol++;
+	}
+	sTable+="</table>";
+
+	return sTable;
+}
+
+function prevMonth(){
+	nTempMonth--;
+	if(nTempMonth==0){
+		nTempYear--;
+		nTempMonth=12;
+	}
+	refreshDatePanel();
+}
+
+function nextMonth(){
+	nTempMonth++;
+	if(nTempMonth==13){
+		nTempYear++;
+		nTempMonth=1;
+	}
+	refreshDatePanel();
+}
+
+function refreshDatePanel(){
+	tdDatePanel.innerHTML=getDatePanel(nTempYear,nTempMonth);
+	txtYear.value=nTempYear+(bMSIE?0:1900);
+	txtMonth.value=nTempMonth;
+	if(oDateIn&&(oDateIn.getYear()==nTempYear||(oDateIn.getYear()<2000&&oDateIn.getYear()+1900==nTempYear))&&oDateIn.getMonth()==(nTempMonth-1)){
+		var oCurTD=document.getElementById("td_"+oDateSelected.getDate());
+		oCurTD.oldColor=oCurTD.style.color;
+		selectDateTD(oCurTD);
+	}
+	if(nTempYear==oDateNow.getYear()&&nTempMonth==(oDateNow.getMonth()+1)){
+		document.all("td_"+oDateNow.getDate()).style.border="solid #303030 1px";
+	}
+
+}
+
+function inputYearMonth(event){
+	if(txtYear.value==""||isNaN(txtYear.value)||parseInt(txtYear.value)<1000||parseInt(txtYear.value)>9999){
+		return;
+	}
+	if(txtMonth.value==""||isNaN(txtMonth.value)||parseInt(txtMonth.value)<1||parseInt(txtMonth.value)>12){
+		return;
+	}
+	if(!(event.keyCode>=48&&event.keyCode<=57)&&!(event.keyCode>=96&&event.keyCode<=105)){
+		return;
+	}
+	nTempYear=parseInt(txtYear.value);
+	nTempMonth=parseInt(txtMonth.value);
+	refreshDatePanel();
+
+}
+
+function selectDateTD(oTD){
+	if((oDateSelected.getYear()==nTempYear||(oDateSelected.getYear()<2000&&oDateSelected.getYear()+1900==nTempYear))&&oDateSelected.getMonth()==(nTempMonth-1)){
+		var oOldTD=document.all("td_"+oDateSelected.getDate());
+		oOldTD.style.backgroundColor="white";
+		oOldTD.style.color=oOldTD.getAttribute("OriginalColor");
+		oOldTD.removeAttribute("oldColor");
+		oOldTD.removeAttribute("oldBackground");
+	}
+	oTD.style.backgroundColor="darkblue";
+	oTD.style.color="white";
+	oTD.setAttribute("oldColor",oTD.style.color);
+	oTD.setAttribute("oldBackground",oTD.style.backgroundColor);
+	oDateSelected.setDate(1);
+	oDateSelected.setYear(nTempYear+(bMSIE?0:1900));
+	oDateSelected.setMonth(nTempMonth-1);
+	oDateSelected.setDate(parseInt(oTD.id.substring(3)));
+}
+
+function dateTd_onmouseover(oTD){
+	if(oTD.getAttribute("oldColor")==null){
+		oTD.setAttribute("oldColor",oTD.style.color);
+		oTD.setAttribute("oldBackground",oTD.style.backgroundColor);
+	}
+	oTD.style.backgroundColor="blue";
+	oTD.style.color="white";
+
+}
+
+function dateTd_onmouseout(oTD){
+	if(oTD.getAttribute("oldColor")==null){
+		oTD.style.backgroundColor="white";
+		oTD.style.color="black";
+	}
+	else{
+		oTD.style.backgroundColor=oTD.getAttribute("oldBackground");
+		oTD.style.color=oTD.getAttribute("oldColor");
+	}
+}
+
+function window_onload(){
+	var sDate=$wapper.api.getQueryString("date","");
+	var sTime="";
+	sDate=sDate.replace(new RegExp("/","gi"),"-");
+	var aParam=sDate.split("-");
+	if(aParam.length==3&&(!isNaN(aParam[0])&&!isNaN(aParam[1])&&!isNaN(aParam[2]))&&(aParam[0]!=""&&aParam[1]!=""&&aParam[2]!="")){
+		nTempYear=parseInt(aParam[0])-(bMSIE?0:1900);
+		nTempMonth=parseInt(aParam[1]);
+		nSelDate=parseInt(aParam[2]);
+	}
+	else{
+		nTempYear=oDateNow.getYear();
+		nTempMonth=(oDateNow.getMonth()+1);
+		nSelDate=oDateNow.getDate();
+	}
+	oDateSelected.setDate(nSelDate);
+	oDateSelected.setMonth(nTempMonth-1);
+	oDateSelected.setYear(nTempYear+(bMSIE?0:1900));
+	if(sDate!=""){
+		oDateIn=oDateSelected;
+	}
+	refreshDatePanel();
+
+	window.focus();
+}
+
+function doOK(){
+	var sReturnValue;	
+	var nRetYear=((!bMSIE)?(1900+oDateSelected.getYear()):oDateSelected.getYear());
+	if(nRetYear<100){
+		nRetYear+=1900;
+	}
+	sReturnValue=nRetYear+"-"+(oDateSelected.getMonth()+1)+"-"+oDateSelected.getDate();
+	var oCtrl=parent.document.getElementById($wapper.api.getQueryString("id"));
+	oCtrl.value=sReturnValue;
+	parent.hideDropDownFrame();
+	if(oCtrl.onchange!=null){
+		oCtrl.onchange();
+	}
+
+}
+
+function window_onkeyup(evt){
+	if(evt.keyCode==27){
+		parent.hideDropDownFrame();
+	}
+}
+
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload=window_onload() bgcolor=white style="margin:0;background-color:#f0f0f0;border:solid gray 1px;overflow:hidden" onkeyup=window_onkeyup(event)>
+<table border=0 cellpadding=1 cellspacing=1 align=center>
+<tr><td>
+	<table border=0 width="100%" cellpadding=1 cellspacing=1>
+	<tr><td width=20 align=left><a href="javascript:prevMonth()" class=date_select>&lt;&lt;</a>
+		<td align=center><nobr>
+		<SCRIPT LANGUAGE="JavaScript">
+		<!--
+		var sYearMonth=sYMInput;
+		sYearMonth=sYearMonth.replace("@YI","<input id=txtYear style=\"width:40px;border:none;border-bottom:solid #909090 1px;text-align:center;background:none;\" value="+nTempYear+" maxlength=4 onkeyup=inputYearMonth(event)>");
+		sYearMonth=sYearMonth.replace("@Y",sYearLabel);
+		sYearMonth=sYearMonth.replace("@MI","<input id=txtMonth style=\"width:20px;border:none;border-bottom:solid #909090 1px;text-align:center;background:none;\" value="+nTempMonth+" maxlength=2 onkeyup=inputYearMonth(event)>");
+		sYearMonth=sYearMonth.replace("@M",sMonthLabel);
+		document.write(sYearMonth);
+		//-->
+		</SCRIPT></nobr>
+		<td width=20 align=right><a href="javascript:nextMonth()" class=date_select>&gt;&gt;</a>
+	</table>
+<tr><td id=tdDatePanel style="background:white">
+</table>
+</BODY>
+</HTML>

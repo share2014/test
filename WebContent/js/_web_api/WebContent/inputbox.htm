@@ -1,0 +1,243 @@
+<!-- /*
+*Usage:loaded at local wapper, should use function in $wapper.api
+*/ -->
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<style type="text/css">
+body,td,input,select{font-size:9pt;}
+</style>
+<SCRIPT LANGUAGE=javascript src="web_api_wapper.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bInline = $wp.getQueryString("inline")=="1";
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper.api.include("language,"+(bInline?"dialog_ext":"dialog"));
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE=javascript>
+<!--
+var bMSIE=$api.fn._IE();
+function doOK(){
+	if(txtInput.value.replace(/ /g,"")==""){
+		alert(sEmptyPrompt);
+		txtInput.focus();
+		return;
+	}
+	if($wp.getQueryString("additional","")!="") {
+		if($wp.getQueryString("additional_required","0")=="1"&&txtInputAdditional.value.replace(/ /g,"")==""){
+			alert(sEmptyPrompt);
+			txtInputAdditional.focus();
+			return;
+		}
+	}
+    if(!checkFormat(txtInput,$wp.getQueryString("format",""))) {
+	    return;
+	}
+    if($wp.getQueryString("additional","")!=""&&document.getElementById("txtInputAdditional")) {
+	    if(!checkFormat(txtInputAdditional,$wp.getQueryString("additional_format",""))){
+			return;
+		}
+	}
+	var sReturnValue=txtInput.value+($wp.getQueryString("additional","")!=""?"\n"+txtInputAdditional.value:"");
+    if(bInline) {
+	    parent.setReturnValue(sReturnValue);
+	}
+	else {
+		setReturnValue(sReturnValue);
+	}
+	closeDialog();
+}
+function checkFormat(oInput,sFormat) {
+	if(sFormat==null){
+		sFormat="";
+	}
+	if(sFormat.indexOf("(")!=-1){
+		sFormat=sFormat.substring(0,sFormat.indexOf("("));
+	}
+	switch(sFormat.toUpperCase()){
+		case "INT":
+			if(isNaN(oInput.value)||oInput.value.indexOf(".")!=-1)	{
+				alert(sIntegerPrompt);
+				oInput.focus();
+				return false;
+			}
+			else{
+				oInput.value=parseInt(oInput.value);
+			}
+			break;
+		case "FLOAT":
+		case "DOUBLE":
+			if(isNaN(parseFloat(oInput.value))){
+				alert(sNumericPrompt);
+				oInput.focus();
+				return false;
+			}
+			else{
+				oInput.value=parseFloat(oInput.value);
+			}
+			break;	
+		default:						
+	}
+	if(oInput.id=="txtInput"&&sFormat.toUpperCase()=="INT"||sFormat.toUpperCase()=="FLOAT"||sFormat.toUpperCase()=="DOUBLE"){
+		var sMinValue=getMinValue();
+		var sMaxValue=getMaxValue();
+		if(sMinValue!=""&&parseFloat(oInput.value)<parseFloat(sMinValue)){
+			alert(sMinValuePrompt.replace("@@min_value",sMinValue));
+			oInput.focus();
+			return false;
+		}
+		if(sMaxValue!=""&&parseFloat(oInput.value)>parseFloat(sMaxValue)){
+			alert(sMaxValuePrompt.replace("@@max_value",sMaxValue));
+			oInput.focus();
+			return false;
+		}
+	}
+	return true;
+}
+function window_onload(){
+	if(!bMSIE){
+		document.body.bgColor="lightgray";
+	}
+	var sdefault=$wp.getQueryString("default");
+	if(sdefault){
+		txtInput.value=sdefault;
+	}
+    if($wp.getQueryString("additional","")!=""&&document.getElementById("txtInputAdditional")) {
+		var sAdditionalDefault=$wp.getQueryString("additional_default");
+		if(sAdditionalDefault){
+			txtInputAdditional.value=sAdditionalDefault;
+		}
+	}
+
+	var maxlength=parseInt($wp.getQueryString("max_length"));
+	if(!isNaN(maxlength)){
+		txtInput.maxLength=maxlength;
+	}
+	window.setTimeout("txtInput.focus();txtInput.select();",100);
+}
+
+function window_onkeypress(evt){
+	if(evt.keyCode==13){
+		doOK();
+	}
+	if(evt.keyCode==27){
+		closeDialog();
+	}
+}
+
+function getMinValue(){
+	if($wp.getQueryString("min_value","")!=""){
+		return $wp.getQueryString("min_value");
+	}
+	var sFormat=$wp.getQueryString("format","").replace(/ /g,"");
+	if(sFormat.indexOf("(")==-1){
+		return "";
+	}
+	if(sFormat.substring(sFormat.length-1)!=")"){
+		return "";
+	}
+	var sMinMax=sFormat.substring(sFormat.indexOf("(")+1,sFormat.length-1);
+	if(sMinMax.indexOf(",")==-1){
+		return "";	
+	}
+	return sMinMax.substring(0,sMinMax.indexOf(","));
+}
+
+function getMaxValue(){
+	if($wp.getQueryString("max_value","")!=""){
+		return $wp.getQueryString("max_value");
+	}
+	var sFormat=$wp.getQueryString("format","").replace(/ /g,"");
+	if(sFormat.indexOf("(")==-1){
+		return "";
+	}
+	if(sFormat.substring(sFormat.length-1)!=")"){
+		return "";
+	}
+	var sMinMax=sFormat.substring(sFormat.indexOf("(")+1,sFormat.length-1);
+	if(sMinMax.indexOf(",")==-1){
+		return "";	
+	}
+	return sMinMax.substring(sMinMax.indexOf(",")+1);
+}
+
+function doStep(bAdd) {
+    if(bAdd==null){
+		bAdd=true;
+	}
+	var nValue=parseInt(txtInput.value)+(bAdd?1:-1)*parseInt($wp.getQueryString("step","1"));
+	if($wp.getQueryString("min_value","")!=""&&nValue<parseFloat(getMinValue())) {
+	    return;
+	}
+	if($wp.getQueryString("max_value","")!=""&&nValue>parseFloat(getMaxValue())) {
+	    return;
+	}
+    txtInput.value = parseInt(txtInput.value)+(bAdd?1:-1)*parseInt($wp.getQueryString("step","1"));
+	if($wp.getQueryString("min_value","")!="") {
+	     document.getElementById("btnDec").disabled = (parseInt(txtInput.value)<=parseFloat(getMinValue()));
+	}
+	if($wp.getQueryString("max_value","")!="") {
+		document.getElementById("btnAdd").disabled = (parseInt(txtInput.value)>=parseFloat(getMaxValue()));
+	}
+
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload=window_onload() onkeypress=window_onkeypress(event) bgcolor=menu scroll=no style="margin:0">
+<div style="height:53px;background:white;">
+<table width=100% cellpadding=0 cellspacing=0 border=0 bgcolor="white">
+<tr><td width=20px><td><b>
+<SCRIPT LANGUAGE=javascript>
+<!--
+document.write($wp.getQueryString("prompt",""));
+//-->
+</SCRIPT>
+</b>
+<td align=right>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+document.write("<img src=\"images/mousetip.gif\" align=absmiddle>");
+//-->
+</SCRIPT>
+</table>
+</div>
+<br>
+<table align=center style="margin-top:12px;">
+<tr><td>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+document.write($wp.getQueryString("title",sInput));
+//-->
+</SCRIPT>
+<td>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+document.write("<input id=txtInput "+($wp.getQueryString("format","")=="password"?"type=password":"")+" style=\"width:160;\">");
+if($wp.getQueryString("format","").toUpperCase()=="INT"&&parseInt($wp.getQueryString("step","1"))>0) {
+    document.write("<input id=btnAdd type=button value=\" + \" style=\"width:20px\" onclick=doStep()>");    
+    document.write("<input id=btnDec type=button value=\" - \" style=\"width:20px\" onclick=doStep(false)>");    
+}
+if($wp.getQueryString("additional","")!="") {
+   document.write("<tr><td>"+$wp.getQueryString("additional","")+"<td><input id=txtInputAdditional "+($wp.getQueryString("additional_format","")=="password"?"type=password":"")+" style=\"width:160;\">");
+}
+//-->
+</SCRIPT>	
+</table>
+<hr>
+<div align=right style="margin-top:5px;padding-right:20px;">
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+	document.write("<input type=button value=\""+sOk+"\" id=btnOK onclick=doOK()>&nbsp;");
+	document.write("<input type=button value=\""+sCancel+"\" id=btnCancel onclick=\"closeDialog()\">");
+
+//-->
+</SCRIPT>
+</div>
+</BODY>
+</HTML>

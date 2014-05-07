@@ -1,0 +1,79 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<SCRIPT LANGUAGE="JavaScript" src="/_web_api/_web_api.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" src="/_web_api/web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var sImportParams="";
+var bClose=false;
+try{
+	sImportParams=window.opener._data_import_dialog_param;
+	$api.lang.sLanguage = window.opener.$api.lang.sLanguage;
+	$api.lang.sCountry = window.opener.$api.lang.sCountry;
+}
+catch(e){
+}
+if(sImportParams==null){
+	alert("参数错误");
+	window.location.href="about:blank";
+}
+
+function getQueryString(sKeyName,sDefault,sUrl){
+	if(sUrl==null){
+		sUrl=sImportParams;
+	}
+	return $wapper.api.getQueryString(sKeyName,sDefault,sUrl);
+}
+
+window.onunload = function(){
+    if(bClose) {
+		if(window.opener!=null) {
+			if(window.opener.$wp!=null) {
+				window.opener.$wp.doRefresh();
+			}
+		}
+	}
+}
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+//document.write("<script language=javascript src=\""+$wapper.api.getQueryString("system_owner_app")+"/servlet/com.lemon.web.LanguageServlet?op=QL\"><\/script>")
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var sRemark=getQueryString("remark","");
+var nPos=sRemark.indexOf("：");
+var sTitle="数据导入向导"
+if(nPos!=-1){
+	sTitle=sRemark.substring(0,nPos);
+}
+document.write("<title>"+sTitle+"</title>");
+//-->
+</SCRIPT>
+<!--
+<SCRIPT LANGUAGE="JavaScript" event=onunload for=window>
+//var sCSVFile=w_main.$wapper.api.getQueryString("csv_file","");
+//if(sCSVFile!=""){
+//	window.open($fn.sFilesWeb+"/servlet/com.lemon.files.DeleteAction?file="+$api.fn.encodeURL(sCSVFile)+"&url_pre="+$api.fn.encodeURL($fn.sFilesWeb)+"&script=top.close()&"+Math.random(),"_blank","width=200,height=160,left=1800,top=1800");
+//}
+</SCRIPT>-->
+</HEAD>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bDebug=(getQueryString("debug","0")=="1");
+var sHtml="<frameset rows=\"*,"+(bDebug?200:0)+"\" border=0>";
+sHtml+="<frame src=\"import_step1.htm?"+Math.random()+"\" name=w_main>";
+sHtml+="<frame src=\"\" name=w_hidden noresize>";
+sHtml+="</frameset>";
+document.write(sHtml);
+
+window.document.body.style.border=0;
+
+top.focus();
+
+//-->
+</SCRIPT>
+</HTML>

@@ -1,0 +1,87 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<style>
+*{font-size:9pt}
+</style>
+<SCRIPT LANGUAGE="JavaScript" src="../web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE=javascript>
+<!--
+
+var sUploadAction=$wapper.api.getQueryString("files_web")+"/servlet/com.lemon.files.UploadAction?redirect_url="+$api._libaray_path+"/after_upload.htm&files_web="+$api.fn.encodeURL($wapper.api.getQueryString("files_web"));
+
+function uploadAttachment(){
+	if(form1.txtFile.value==""){
+		alert("请选择附件文件");
+		return false;
+	}
+	else
+	{	
+		if(form1.txtTitle.value==""){
+			//alert("请输入附件的说明文字");
+			var a_temp=form1.txtFile.value.lastIndexOf("\\");
+			if(a_temp!=-1)
+			{
+			    temp_file=form1.txtFile.value.substring(a_temp+1);
+				form1.txtTitle.value=temp_file;
+			}
+			return false;
+		}
+	}
+
+	form1.action=sUploadAction+(sUploadAction.indexOf("?")==-1?"?":"&")+"folder="+$wapper.api.getQueryString("folder")+"&script=parent.onUploadComplete()&"+Math.random();
+	form1.target="w_hidden"
+	form1.submit();
+	return true;
+}
+
+function onUploadComplete(){
+    if(w_hidden.getFileCount()!=1||w_hidden.getLastError()){
+		alert(w_hidden.getLastError());
+		return;
+	}
+	nUploadFileSize = w_hidden.getFileSize(0);
+//alert(nUploadFileSize);
+//	top.dialogArgruments.getParamUpload(sFileSize,sFolder);
+	try{
+			var oRange=$api.win.dialogArguments.DHTMLEditor.DOM.selection.createRange();
+			if(oRange){
+				oRange.pasteHTML("<a href=\""+w_hidden.getFileURL(0)+"\" target=_blank>"+form1.txtTitle.value+"</a>");
+				$api.win.dialogArguments.DHTMLEditor.refresh();
+			}
+			else{
+				alert("不能在当前位置插入附件。");
+			}
+	}
+	catch(e){}
+	$api.win.returnValue=w_hidden.getFileURL(0)+"\n"+nUploadFileSize;
+	$api.win.close();
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY bgcolor="#F0F0F0" style="margin:0;" scroll=no>
+<div style="height:50px;background:white;">
+<table width=100% cellpadding=0 cellspacing=0>
+<tr><td width=20px><td><b>插入附件</b>
+<td align=right><img src="../images/mousetip.gif" align=absmiddle>
+</table>
+</div>
+<form ENCTYPE="multipart/form-data" id="form1" name="form1" method="post" action="" target=w_hidden>
+	<table align=center>
+	<tr><td>附件说明:<td><input name=txtTitle style="width:300px;border:solid black 1px;">
+	<tr><td>附件文件:<td><INPUT type=file id=txtFile name=txtFile runat="server"  style="width:300px;border:solid black 1px;">
+	<!--<tr><td>高级设置:<td><input type=checkbox name=chkUnzip> Zip包自动解压缩，请输入访问的主文件名<br>
+	    <input name=txtMainFile style="width:200px;border:solid black 1px;">-->
+	</table>
+</form>
+<hr style="margin-top:-20px;">
+<div align=right style="margin-top:-15px;padding-right:20px;">
+<INPUT type="button" value="确 定" onclick="uploadAttachment()">&nbsp;
+<INPUT type="button" value="取 消" onclick="$api.win.close()">
+</div>
+<iframe name="w_hidden" id="w_hidden" style="width:100%;display:none;"></iframe>
+
+</BODY>
+</HTML>

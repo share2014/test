@@ -1,0 +1,300 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<TITLE>Color Dialog</TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bInline = $wp.getQueryString("inline")=="1";
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+//$wapper._language_new_version=null;
+//$wapper.win_remark = "$api.win.frames[0]";
+//$wapper.api.include("color,language,dialog");
+$wapper.api.include("language,color,"+(bInline?"dialog_ext":"dialog"));
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper._language_new_version=2;
+var bMSIE=$api.fn._IE();
+
+$api.win.document.title=sDocTitle;
+
+var nTableLeft=24;
+var nTableTop=15;
+var nTablwWidth=270;
+var nTableHeight=160;
+
+var nBaseRed=255;
+var nBaseGreen=0;
+var nBaseBlue=0;
+
+var nIndexZ=120;
+
+var sSelectedColor="ff0000";
+
+function dialogClose() {
+    if(bInline) {
+		//parent.dialogWin.close();
+		parent.closeDialog();
+	}
+	else top.close();
+}
+
+function window_onload(){
+	//for(var obj=imgColorTable;obj;obj=obj.offsetParent){
+		//nTableLeft+=obj.offsetLeft;
+		//nTableTop+=obj.offsetTop;
+	//}
+	onSelectBaseColor();
+	showLastSelect();
+	var sClrIn=$wapper.api.getQueryString("color","");
+	if(sClrIn){
+		sSelectedColor=sClrIn;
+		txtColor.value=sClrIn;
+		txtColor_onkeyup();
+	}
+}
+
+function colortable_onmousemove(event){
+	var x=(bMSIE?event.x:event.pageX)-nTableLeft;
+	var y=(bMSIE?event.y:event.pageY)-nTableTop;
+
+	nBaseRed=getBaseRed(x,y);
+	nBaseGreen=getBaseGreen(x,y);
+	nBaseBlue=getBaseBlue(x,y);
+	var s=nBaseRed;
+	sBaseColor=getRGBColor(nBaseRed,nBaseGreen,nBaseBlue);
+	showTempColor(sBaseColor);
+}
+
+function colortable_onclick(event){
+	onSelectBaseColor();
+	var sColor=getRGBColor(nBaseRed,nBaseGreen,nBaseBlue);
+	selectColor(sColor);
+	imgCross.style.display="";
+	imgCross.style.left=(bMSIE?event.x:event.pageX)-9;
+	imgCross.style.top=(bMSIE?event.y:event.pageY)-9;
+}
+
+function getBaseRed(x,y){
+	var dx=nTablwWidth/6;
+	var nRed=0
+	if(x<=dx){
+		nRed=255;
+	}
+	else if(x<=2*dx){
+		nRed=255-(x-dx)/dx*255;
+	}
+	else if(x<=4*dx){
+		nRed=0;
+	}
+	else if(x<=5*dx){
+		nRed=(x-4*dx)/dx*255;
+	}
+	else{
+		nRed=255;
+	}
+	return Math.floor(nRed+(y*(128-nRed)/nTableHeight));
+}
+
+function getBaseGreen(x,y){
+	var dx=nTablwWidth/6;
+	var nGreen=0;
+	if(x<=dx){
+		nGreen=255*x/dx;
+	}
+	else if(x<=3*dx){
+		nGreen=255;
+	}
+	else if(x<=4*dx){
+		nGreen=255-(x-3*dx)/dx*255;
+	}
+	else{
+		nGreen=0;
+	}
+	return Math.floor(nGreen+(y*(128-nGreen)/nTableHeight));
+
+}
+
+function getBaseBlue(x,y){
+	var dx=nTablwWidth/6;
+	var nBlue=0;
+	if(x<=2*dx){
+		nBlue=0;
+	}
+	else if(x<=3*dx){
+		nBlue=(x-2*dx)/dx*255;
+	}
+	else if(x<=5*dx){
+		nBlue=255;
+	}
+	else{
+		nBlue=255-(x-5*dx)/dx*255;
+	}
+	return Math.floor(nBlue+(y*(128-nBlue)/nTableHeight));
+
+}
+
+function getRGBColor(nRed,nGreen,nBlue){
+	var sRed=nRed.toString(16);
+	var sGreen=nGreen.toString(16);
+	var sBlue=nBlue.toString(16);
+	var sColor=(sRed.length==1?"0":"")+sRed+(sGreen.length==1?"0":"")+sGreen+(sBlue.length==1?"0":"")+sBlue;
+	return sColor;
+}
+
+function onSelectBaseColor(){
+	var sHTML="<table id=tblExtColor border=0 cellpadding=0 cellspacing=0 style=\"border:inset 1px;cursor:hand;\" onmouseout=\"showLastSelect()\">";
+	
+	var nRed=nBaseRed;
+	var nGreen=nBaseGreen;
+	var nBlue=nBaseBlue;
+
+	for(var i=15;i>=0;i--){
+		var nTmpRed=Math.floor(nRed+i*(255-nRed)/15);
+		var nTmpGreen=Math.floor(nGreen+i*(255-nGreen)/15);
+		var nTmpnBlue=Math.floor(nBlue+i*(255-nBlue)/15);
+		var sColor=getRGBColor(nTmpRed,nTmpGreen,nTmpnBlue);
+		sHTML+="<tr><td style=\"height:5px;width:20px;\" onmousemove=showTempColor('"+sColor+"') onmouseup=tdExtColor_onmouseup(this,'"+sColor+"') bgcolor=#"+sColor+">";
+	}
+	for(var i=0;i<=15;i++){
+		var nTmpRed=Math.floor(nRed+i*(0-nRed)/15);
+		var nTmpGreen=Math.floor(nGreen+i*(0-nGreen)/15);
+		var nTmpnBlue=Math.floor(nBlue+i*(0-nBlue)/15);
+		var sColor=getRGBColor(nTmpRed,nTmpGreen,nTmpnBlue);
+		sHTML+="<tr><td style=\"height:5px;width:20px;\" onmousemove=showTempColor('"+sColor+"'); onmouseup=tdExtColor_onmouseup(this,'"+sColor+"') bgcolor=#"+sColor+">";
+	}
+
+	sHTML+="</table>";
+	tdExtColor.innerHTML=sHTML;
+	tdExtColor_onmouseup(tblExtColor.rows[15].cells[0],getRGBColor(nBaseRed,nBaseGreen,nBaseBlue));
+}
+
+function tdExtColor_onmouseup(oTD,sColor){
+	var x=0;
+	var y=0;
+	for(var obj=oTD;obj;obj=obj.offsetParent){
+		x+=obj.offsetLeft;
+		y+=obj.offsetTop;
+	}
+	if(x==0&&y==0){
+		x=335;
+		y=89;
+	}
+	imgArrow.style.display="";
+	imgArrow.style.left=x+oTD.offsetWidth+2;
+	imgArrow.style.top=y-5;
+	selectColor(sColor);
+}
+
+function selectColor(sColor){
+	sSelectedColor=sColor;
+	txtColor.value=sColor;
+	txtRed.value=parseInt(sColor.substring(0,2),16);
+	txtGreen.value=parseInt(sColor.substring(2,4),16);
+	txtBlue.value=parseInt(sColor.substring(4,6),16);
+	showTempColor(sColor);
+}
+
+function showTempColor(sColor){
+	try{
+		divColor.style.backgroundColor=sColor;
+	}
+	catch(e){
+		//sColor=sColor.replace(/-/g,"0");
+	}
+	spanColor.innerHTML="#"+sColor;
+}
+
+function showLastSelect(){
+	txtColor.value=sSelectedColor;
+	divColor.style.backgroundColor=sSelectedColor;
+}
+
+function txtColor_onkeydown(){
+	if(event.keyCode!=8&&event.keyCode!=46){
+		var c=String.fromCharCode(event.keyCode);
+		if("0123456789abcdef".indexOf(c.toLowerCase())==-1){
+			event.keyCode=0;
+			return false;
+		}
+	}
+	return true;
+}
+
+function txtColor_onkeyup(){
+	if(txtColor.value.length==6){
+		selectColor(txtColor.value);
+	}
+}
+
+function txtColorRGB_onkeyup(){
+	var sValue=event.srcElement.value;
+	if(sValue==""||isNaN(sValue)){
+		event.srcElement.value="";
+		return;
+	}
+	if(parseInt(sValue)>255){
+		event.srcElement.value=255;
+	}
+	if(parseInt(sValue)<0){
+		event.srcElement.value=0;
+	}
+	var sColor=getRGBColor(parseInt(txtRed.value),parseInt(txtGreen.value),parseInt(txtBlue.value));
+	selectColor(sColor);
+}
+
+function doOK(){
+
+	var sReturnValue="#"+sSelectedColor;
+    if(bInline) {
+	    parent.setReturnValue(sReturnValue);
+	}
+	else {
+		setReturnValue(sReturnValue);
+	}
+	dialogClose();
+}
+
+//-->
+</SCRIPT>
+</HEAD>
+<BODY bgcolor=menu onload=window_onload() ondragstart="return false" onselectstart="return (event.srcElement.tagName=='INPUT')" style="margin:0;border:0" scroll=no>
+<table cellpadding=4 cellspacing=8 align=center>
+<tr><td id=tdColorTable>
+	<img style="border:inset 1px;cursor:hand;" src="images/color_table.jpg" width="270" height="160" id="imgColorTable" align="absmiddle" onmousemove="colortable_onmousemove(event)" onclick="colortable_onclick(event)" onmouseout="showLastSelect(event)">
+	<td id=tdExtColor width=20>
+	<td valign=top>
+		<SCRIPT LANGUAGE="JavaScript">
+		<!--
+			document.write("<table>");
+			document.write("<tr><td>"+sSelectLabel+"<td><span id=spanColor style=\"width:60px\">ff0000</span>");
+			document.write("<tr><td>"+sCurrentLabel+"<td><input id=txtColor style=\"width:60px\" value=\"\" maxlength=6 onkeyup=\"txtColor_onkeyup(event)\" onkeydown=\"return txtColor_onkeydown(event)\">");
+			document.write("<tr><td>"+sRedLabel+"<td><input id=txtRed style=\"width:60px\" value=\"255\" onkeyup=txtColorRGB_onkeyup(event) maxlength=3>");
+			document.write("<tr><td>"+sGreenLabel+"<td><input id=txtGreen style=\"width:60px\" value=\"0\" onkeyup=txtColorRGB_onkeyup(event) maxlength=3>");
+			document.write("<tr><td>"+sBlueLabel+"<td><input id=txtBlue style=\"width:60px\" value=\"0\" onkeyup=txtColorRGB_onkeyup(event) maxlength=3>");
+			document.write("<tr><td><td><div style=\"padding-top:10px\">");
+			document.write("	<div style=\"width:60px;height:22px;border:inset 1px;\" id=divColor>&nbsp;</div>");
+			document.write("	</div>");
+			document.write("</table>");
+
+		//-->
+		</SCRIPT>
+</table>
+<hr>
+<div align=right style="padding-right:20px;">
+	<SCRIPT LANGUAGE="JavaScript">
+	<!--
+		document.write("<input type=button value=\""+sOk+"\" id=btnOK onclick=doOK()>&nbsp;");
+		document.write("<input type=button value=\""+sCancel+"\" id=btnCancel onclick=\"dialogClose()\">");
+	//-->
+	</SCRIPT>
+</div>
+<img id=imgCross src="images/clr_cross.gif" width=19 height=19 style="position:absolute;display:none;">
+<img id=imgArrow src="images/clr_arrow.gif" width=5 height=9 style="position:absolute;display:none;">
+</BODY>
+</HTML>

@@ -1,0 +1,27 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE=javascript src="web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function window_onload(){
+	var sScript=$wapper.api.getQueryString("script","");
+	if(sScript==""){
+		sScript="parent.afterDelete();"
+	}
+	//window.execScript("try{"+sScript+"}catch(e){}");
+	eval("try{"+sScript+"}catch(e){}");
+}
+
+function getLastError(){
+	return $wapper.api.getQueryString("error","");
+}
+
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload()">
+
+</BODY>
+</HTML>

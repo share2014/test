@@ -1,0 +1,138 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="../web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper.api.include("dialog");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function doOK(){
+	if(txtFontSize.value!=""&&isNaN(txtFontSize.value)){
+		alert("字体大小输入错误，请输入整数！");
+		return;
+	}
+	if(txtLineHeight.value!=""&&isNaN(txtLineHeight.value)){
+		alert("行间距输入错误，请输入整数！");
+		return;
+	}
+	if(txtLetterSpacing.value!=""&&isNaN(txtLetterSpacing.value)){
+		alert("字符间距输入错误，请输入整数！");
+		return;
+	}
+	if(txtLineHeight.value!=""&&txtFontSize.value!=""){
+		if(parseInt(txtLineHeight.value)<parseInt(txtFontSize.value)){
+			alert("行间距不得小于字体大小！");
+			return;
+		}
+	}
+	setReturnValue(selFontName.value+"\n"+txtFontSize.value+"\n"+txtLineHeight.value+"\n"+txtLetterSpacing.value);
+	$api.win.close();
+}
+
+function window_onload(){
+	var oObject=$api.win.dialogArguments.getElementUnderCaret();
+	while(oObject!=null){
+		if(oObject.style==null){
+			oObject=oObject.parentNode;
+			continue;
+		}
+		if(selFontName.value==""){
+			if(oObject.style.fontFamily!=""){
+				selFontName.value=oObject.style.fontFamily;
+				if(selFontName.selectedIndex==-1){
+					var aFontName=oObject.style.fontFamily.split(",");
+					for(var i=0;i<aFontName.length;i++){
+						selFontName.value=aFontName[i];
+						if(selFontName.selectedIndex==-1){
+							var oOption=document.createElement("OPTION");
+							oOption.text=aFontName[i];
+							oOption.value=aFontName[i];
+							selFontName.add(oOption);
+						}
+					}
+					selFontName.value=aFontName[0];
+				}
+			}
+		}
+		if(txtFontSize.value==""){
+			if(oObject.style.fontSize!=""){
+				txtFontSize.value=oObject.style.fontSize.replace(/px/gi,"");
+				if(txtFontSize.value.indexOf("%")!=-1){
+					txtFontSize.value="";
+				}
+				if(txtFontSize.value.indexOf("pt")!=-1){
+					txtFontSize.value=Math.floor(4*parseInt(txtFontSize.value.replace(/pt/gi,""))/3);
+				}
+			}
+		}
+		if(txtLineHeight.value==""){
+			if(oObject.style.lineHeight!=""){
+				txtLineHeight.value=oObject.style.lineHeight.replace(/px/gi,"");
+				if(txtLineHeight.value.indexOf("%")!=-1){
+					txtLineHeight.value="";
+				}
+				if(txtLineHeight.value.indexOf("pt")!=-1){
+					txtLineHeight.value=Math.floor(4*parseInt(txtLineHeight.value.replace(/pt/gi,""))/3);
+				}
+			}
+		}
+		if(txtLetterSpacing.value==""){
+			if(oObject.style.letterSpacing!=""){
+				txtLetterSpacing.value=oObject.style.letterSpacing.replace(/px/gi,"");
+				if(txtLetterSpacing.value.indexOf("%")!=-1){
+					txtLetterSpacing.value="";
+				}
+				if(txtLetterSpacing.value.indexOf("pt")!=-1){
+					txtLetterSpacing.value=Math.floor(4*parseInt(txtLetterSpacing.value.replace(/pt/gi,""))/3);
+				}
+			}
+		}
+		oObject=oObject.parentNode;
+	}
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload()" bgcolor="#F0F0F0" style="margin:0" scroll=no>
+<table align="center">
+<tr><td>字&nbsp;&nbsp;体：<td>
+	<select id="selFontName">
+		<option value="">-默认-
+		<option value="宋体">宋体
+		<option value="新宋体">新宋体
+		<option value="黑体">黑体
+		<option value="楷体_GB2312">楷体_GB2312
+		<option value="仿宋_GB2312">仿宋_GB2312
+		<option value="隶书">隶书
+		<option value="幼圆">幼圆
+		<option value="Arial">Arial
+		<option value="Fixedsys">Fixedsys
+		<option value="MS Serif">MS Serif
+		<option value="Courier">Courier
+		<option value="MS Sans Serif">MS Sans Serif
+		<option value="Courier New">Courier New
+		<option value="Wingdings">Wingdings
+		<option value="Symbol">Symbol
+		<option value="Verdana">Verdana
+		<option value="Arial Black">Arial Black
+		<option value="Tahoma">Tahoma
+		<option value="Webdings">Webdings
+		<option value="Arial Narrow">Arial Narrow
+		<option value="Times New Roman">Times New Roman
+	</select>
+<tr><td>字&nbsp;&nbsp;号：<td><input id=txtFontSize style="width:40px;text-align:center" maxlength=2> 像素
+<tr><td>行间距：<td><input id=txtLineHeight style="width:40px;text-align:center" maxlength=2> 像素
+<tr><td>字符间距：<td><input id=txtLetterSpacing style="width:40px;text-align:center" maxlength=2> 像素
+</table>
+<hr>
+<div align=right style="padding-top:8px;padding-right:20px">
+<input type=button value="确 定" onclick="doOK()">
+<input type=button value="取 消" onclick="$api.win.close();">
+</div>
+
+</BODY>
+</HTML>

@@ -1,0 +1,70 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>Inser Table</TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="../web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper._language_new_version=null;
+$wapper.win_remark = "$api.win.frames[0]";
+$wapper.api.include("language,dialog");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function doOK(){
+	var sHtml="<table cellpadding=\""+txtCellpadding.value+"\" cellspacing=\""+txtCellspacing.value+"\" border=\""+txtBorder.value+"\" ";
+	sHtml+=" width=\""+txtWidth.value+"\" height=\""+txtHeight.value+"\" "+(selAlign.value==""?"":"align=\""+selAlign.value+"\"")+" >";
+	if(isNaN(txtRows.value)||txtRows.value==""){
+		alert(sRowsError);
+		return;
+	}
+	if(isNaN(txtCols.value)||txtCols.value==""){
+		alert(sColsError);
+		return;
+	}
+	for(var i=0;i<parseInt(txtRows.value);i++){
+		sHtml+="<tr>";
+		for(var j=0;j<parseInt(txtCols.value);j++){
+			sHtml+="<td valign=\""+selVAlign.value+"\">";
+		}
+	}
+	sHtml+="</table>";
+	setReturnValue(sHtml);
+	$api.win.close();
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY bgcolor="#F0F0F0" scroll="no">
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+document.write("	<table> ");
+document.write("	<tr><td> ");
+document.write("		<fieldset style=\"padding:5px;height:160px;\"><legend>"+sLayout+"</legend> ");
+document.write("		<table> ");
+document.write("		<tr><td>"+sRows+"<td><input id=txtRows style=\"width:40px\" value=3><td>&nbsp;<td>"+sCols+"<td><input id=txtCols style=\"width:40px\" value=3> ");
+document.write("		<tr><td>"+sWidth+"<td><input id=txtWidth style=\"width:40px\" value=\"75%\"><td>&nbsp;<td>"+sHeight+"<td><input id=txtHeight style=\"width:40px\"> ");
+document.write("		<tr><td>"+sBorder+"<td colspan=4><input id=txtBorder style=\"width:40px\" value=1> ");
+document.write("		<tr><td>"+sAlign+"<td colspan=4><select id=selAlign><option value=\"\">"+sAlignDefault+"<option value=\"left\">"+sAlignLeft+"<option value=\"center\">"+sAlignCenter+"<option value=\"right\">"+sAlignRight+"</select>");
+document.write("		</table> ");
+document.write("		</fieldset> ");
+document.write("	<td> ");
+document.write("		<fieldset style=\"padding:5px;height:160px;\"><legend>"+sCells+"</legend> ");
+document.write("		<table> ");
+document.write("		<tr><td>"+sSpacing+"<td><input id=txtCellspacing style=\"width:40px\" value=2> ");
+document.write("		<td>&nbsp;<td>"+sPadding+"<td><input id=txtCellpadding style=\"width:40px\" value=2> ");
+document.write("		</table> ");
+document.write("		<br> ");
+document.write("		<table> ");
+document.write("		<tr><td>"+sVAlign+"<td><select id=selVAlign><option value=\"\">"+sDefault+"<option value=\"top\">"+sTop+"<option value=\"absmiddle\">"+sAbsMiddle+"<option value=\"bottom\">"+sBottom+"</select> ");
+document.write("		</table> ");
+document.write("		</fieldset> ");
+document.write("	<tr><td colspan=5 align=right>&nbsp;<br> ");
+document.write("		<input type=button value=\""+sOk+"\" onclick=\"doOK()\">&nbsp; ");
+document.write("		<input type=button value=\""+sCancel+"\" onclick=\"$api.win.close()\">&nbsp; ");
+document.write("	</table> ");
+//-->
+</SCRIPT>
+</BODY>
+</HTML>

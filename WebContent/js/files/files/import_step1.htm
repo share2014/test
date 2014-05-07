@@ -1,0 +1,187 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="/_web_api/web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper.api.include("files_web");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+if($api.lang.sLanguage&&$api.lang.sCountry){
+	$wapper.api.includeLangBundle("_import_step1",top.getQueryString("system_owner_app"));
+}
+else{
+	$wapper.api.includeLangBundle("_import_step1");
+}
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bImportFromDB=(top.getQueryString("db_import","0")=="1");
+var sImportType=top.getQueryString("type","csv").toUpperCase();
+
+if(bImportFromDB) {
+    document.write("<script language=javascript src=\""+top.getQueryString("options_js")+"\">\<\/script>");
+}
+//-->
+</SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var sCSVFile=$wapper.api.getQueryString("csv_file","");
+
+function doUpload(){
+	form1.action=$fn.getUploadAction()+($fn.getUploadAction().indexOf("?")!=-1?"&":"?")+"folder=upload/temp/csv&script=top.w_main.afterUpload()&"+Math.random();
+	form1.submit();
+}
+
+function afterUpload(){
+	if(parent.w_hidden.getFileCount()!=1||parent.w_hidden.getLastError()){
+		alert(parent.w_hidden.getLastError());
+		return;
+	}
+	var sOldFile=sCSVFile;
+	sCSVFile=parent.w_hidden.getFileURL(0);
+	sCSVFile=getUploadURLOnServer(sCSVFile,$wapper.api.getURLHost($api.fn.sLocalPortal));
+	if(sOldFile!=""){
+		top.w_hidden.location.href=$fn.getUploadAction()+"?url_pre="+$api.fn.encodeURL($fn.sFilesWeb)+"&file="+$api.fn.encodeURL(sOldFile)+"&script="+$api.fn.encodeURL("window.location.href='about:blank';")+"&"+Math.random();
+	}
+	else{
+		top.w_hidden.location.href="about:blank";
+	}
+	doNext(true);
+}
+
+function doNext(bUploaded){
+	form1.btnOK.disabled=true;
+    if(!bImportFromDB) {
+		doNextUpload(bUploaded)
+	}
+	else {
+		doNextDB();
+	}
+}
+
+function doNextUpload(bUploaded){
+	if(sCSVFile==""){
+		if(form1.txtFile.value==""){
+			alert(sPleaseSelectFile);
+			form1.txtFile.focus();
+			form1.btnOK.disabled=false;
+			return;
+		}
+	}
+	if(form1.txtFile.value!=""){
+		var sExt=$api.fn.getFileExtName(form1.txtFile.value);
+		if(sExt.toUpperCase()!=sImportType){
+			alert(sPleaseSelectCsvFile.replace("{0}",sImportType));
+			form1.btnOK.disabled=false;
+			return;
+		}
+	}
+	if(form1.txtFile.value!=""&&!bUploaded){
+		doUpload();
+		return;
+	}
+	var sUrl=$wapper.api.getParentPath()+"/import_step2.htm?"+$wapper.api.getURLParams()+"&"+Math.random();
+	sUrl=$wapper.api.setQueryString("labeled",top.getQueryString("labeled","0"),sUrl);
+	sUrl=$wapper.api.setQueryString("indexed",top.getQueryString("indexed","0"),sUrl);
+	sUrl=$wapper.api.setQueryString("refresh",top.getQueryString("refresh","0"),sUrl);
+	sUrl=$wapper.api.setQueryString("csv_file",sCSVFile,sUrl);
+	sUrl=$wapper.api.setQueryString("type",sImportType,sUrl);
+	window.location.href=sUrl;
+
+}
+
+function doNextDB(){
+	var sUrl=$wapper.api.getParentPath()+"/import_step2.htm?"+$wapper.api.getURLParams()+"&"+Math.random();
+	var sDataUrl = resetOptionsURL("");
+	if(sDataUrl=="") {
+		return;
+	}
+	if(sDataUrl.toLowerCase().indexOf("http://")==0){
+		sDataUrl=sDataUrl.substring(sDataUrl.indexOf("/",9));
+	}
+	sDataUrl=top.getQueryString("system_owner_app")+"/"+sDataUrl;
+	sDataUrl=$api.fn.formatFileName(sDataUrl,"/");
+	sUrl=$wapper.api.setQueryString("csv_file",sDataUrl,sUrl);
+	sUrl=$wapper.api.setQueryString("labeled","1",sUrl);
+	window.location.href=sUrl;
+}
+
+function window_onload(){
+	if(window.navigator.appVersion.indexOf("MSIE")==-1){
+		document.body.bgColor="lightgray";
+	}
+	document.getElementById("tblDataSource").style.display=(bImportFromDB?"":"none");
+	document.getElementById("tblUpload").style.display=(bImportFromDB?"none":"");
+	
+	if($api.lang.sLanguage&&$api.lang.sCountry){
+		$wapper.api.doLanguageBinding("span_wizard,td_select_file,span_demo1,span_demo2,btn_ok,btn_cancel");
+	}
+	if(typeof(sSpanWizard)=="string"){
+		top.document.title=sSpanWizard;
+	}
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload()" bgcolor=menu style="margin:0" scroll=no>
+<FORM METHOD=POST ACTION="" ENCTYPE="multipart/form-data" name="form1" target="w_hidden">
+<div style="background:white;">
+	<table width="100%"><tr><td style="padding-left:20px;padding-top:4px;" valign="top">
+	<SCRIPT LANGUAGE="JavaScript">
+	<!--
+	var sRemark=top.getQueryString("remark","");
+	var nPos=sRemark.indexOf("：");
+	if(nPos!=-1){
+		sRemark="<span style=\"line-height:30px;\"><b>"+sRemark.substring(0,nPos)+"</b></span><br>&nbsp;&nbsp;"+sRemark.substring(nPos+1);
+	}
+	else{
+		sRemark="<span style=\"line-height:30px;\"><b><span id=spanWizard>数据导入向导</span></b></span><br>&nbsp;&nbsp;"+sRemark;
+	}
+	document.write(sRemark);
+	//-->
+	</SCRIPT>
+	<td width=80>
+		<img src="images/import.gif" align=absmiddle>
+	</table>
+</div>
+	<p>&nbsp;</p>
+	<table id=tblDataSource align=center height=270 style="display:none">
+	<tr><td>
+		<SCRIPT LANGUAGE="JavaScript">
+		<!--
+		if(bImportFromDB) {
+		     writeOptionsHTML();
+	    }
+		//-->
+		</SCRIPT>
+	</table>
+	<table id=tblUpload align=center height=270 style="display:none">
+	<tr><td id=tdSelectFile>选择文件：<td><input type=file name=txtFile style="width:400px" >
+	<tr><td>&nbsp;<td height=40 valign=top>
+		<SCRIPT LANGUAGE="JavaScript">
+		<!--
+		if(sCSVFile!=""){
+			document.write("<p>已经上传的数据文件：<a href=\""+sCSVFile+"\" target=_blank>"+sCSVFile+"</a></p>");
+		}
+		else {
+			if(top.getQueryString("demo","")!="") {
+				document.write("<p><span id=spanDemo1>如果对要导入的数据文件格式不熟悉，请下载并参考</span><a href=\""+top.getQueryString("demo")+"\" target=_blank><span id=spanDemo2>模板文件</span></a></p>");
+			}
+		}
+		//-->
+		</SCRIPT>
+	</table>
+<div align=right style="margin-top:10px;padding-right:60px;">
+	<input type=button value="下一步" id=btnOK onclick="doNext()" style="width:60px">&nbsp;
+	<input type=button value="取 消" id=btnCancel onclick="top.close()" style="width:60px">
+</div>
+</FORM>
+
+</BODY>
+</HTML>

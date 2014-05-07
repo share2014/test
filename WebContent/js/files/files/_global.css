@@ -1,0 +1,4 @@
+body,p,td,caption,input,select{font-size:10pt}
+
+a{color:black;text-decoration:underline;}
+a:hover{color:red;text-decoration:underline;}

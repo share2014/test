@@ -1,0 +1,89 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE=javascript src="web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var aFile=new Array();
+var aKey=new Array();
+var aSize=new Array();
+
+aFile=$wapper.api.getQueryString("files","").split("\n");
+aKey=$wapper.api.getQueryString("keys","").split("\n");
+aSize=$wapper.api.getQueryString("size","").split("\n");
+
+function window_onload(){
+	var sScript=$wapper.api.getQueryString("script","");
+	if(sScript==""){
+		sScript="parent.afterUpload();"
+	}
+	eval(sScript);
+}
+
+function getLastError(){
+	return $wapper.api.getQueryString("error","");
+}
+
+function getFileCount(){
+	if(getLastError()!=""){
+		return 0;
+	}
+	return aFile.length;
+}
+
+function getFileURL(index){
+	var sUrl="";
+	if(index==null){
+		index=0;
+	}
+	if(typeof(index)=="number"){
+		sUrl=aFile[index];
+	}
+	if(typeof(index)=="string"){
+		for(var i=0;i<aKey.length;i++){
+			if(aKey[i]==index){
+				sUrl=aFile[i];
+			}
+		}
+	}
+	if(sUrl==""){
+		return "";
+	}
+	sUrl=$wapper.api.getQueryString("files_web")+sUrl;
+	if(sUrl.toLowerCase().indexOf("http://")!=0){
+		sUrl="http://"+window.location.host+"/"+sUrl;
+	}
+	return $api.fn.formatFileName(sUrl,"/");
+}
+
+function getFileKey(index){
+	if(index==null){
+		index=0;
+	}
+	return aKey[index];
+}
+
+function getFileSize(index){
+	var sSize="0";
+	if(index==null){
+		index=0;
+	}
+	if(typeof(index)=="number"){
+		sSize=aSize[index];
+	}
+	if(typeof(index)=="string"){
+		for(var i=0;i<aKey.length;i++){
+			if(aKey[i]==index){
+				sSize=aSize[i];
+			}
+		}
+	}
+	return parseFloat(sSize);
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="window_onload()">
+</BODY>
+</HTML>

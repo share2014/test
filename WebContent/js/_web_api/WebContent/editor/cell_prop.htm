@@ -1,0 +1,417 @@
+<HTML>
+<HEAD>
+<TITLE></TITLE>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<SCRIPT LANGUAGE="JavaScript" src="../web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="javascript">
+<!--
+$wapper.api.include("dialog,color,files_web,./checkinput");
+//-->
+</SCRIPT>
+<script language="javascript">
+var oTD=null;
+var bLoaded=false;
+
+var sUploadFile="";
+var bMustUpload=false;
+
+function window_onload(){
+    oTD=$api.win.dialogArguments.getEditorDOM().getElementById($wapper.api.getQueryString("object_id"));
+    window.setTimeout("doInitlize();",200);
+}
+
+function doInitlize() {
+	if(oTD.align==""){
+		oTD.align="left";
+	}
+	if(oTD.vAlign==""){
+		oTD.vAlign="middle";
+	}
+	selAlign.value=oTD.align;
+	selVAlign.value=oTD.vAlign;
+
+	var sWidth=oTD.getAttribute("width");
+	if(sWidth!=null&&sWidth!=""){
+		chkwidth.checked=true;
+		SetEnabled(true);
+		if(sWidth.substring(sWidth.length-1,sWidth.length)=="%"){
+			txtWidth.value=sWidth.substring(0,sWidth.length-1);
+			optWidth2.checked=true;
+		}
+		else if(sWidth.substring(sWidth.length-2,sWidth.length).toUpperCase()=="PX"){
+			txtWidth.value=sWidth.substring(0,sWidth.length-2);
+			optWidth1.checked=true;
+		}
+		else
+			txtWidth.value=sWidth;
+	}
+	txtHeight.value = oTD.height;
+	txtLineHeight.value = (oTD.style.lineHeight?parseInt(oTD.style.lineHeight):"");
+	setSelectValue(selBGColor,oTD.bgColor);
+	var sTemp=oTD.borderColor;
+	if(sTemp==""||sTemp==null) {
+		sTemp=oTD.style.borderTopColor;
+		if(sTemp=="") sTemp=oTD.style.borderBottomColor;
+		if(sTemp=="") sTemp=oTD.style.borderLeftColor;
+		if(sTemp=="") sTemp=oTD.style.borderRightColor;
+	}
+
+	setSelectValue(txtBorderColor,sTemp);
+	setSelectValue(txtLightBorder,oTD.borderColorLight);
+	setSelectValue(txtDarkBorder,oTD.borderColorDark);
+	txtColSpan.value=oTD.colSpan;
+	txtRowSpan.value=oTD.rowSpan;
+	if(oTD.style.borderTopWidth!=""){
+		if(oTD.style.borderTopWidth.indexOf("px")!=-1) {
+			txtBorderTop.value=parseInt(oTD.style.borderTopWidth)
+		}
+	}
+	if(oTD.style.borderBottomWidth!=""){
+		if(oTD.style.borderBottomWidth.indexOf("px")!=-1) {
+			txtBorderBottom.value=parseInt(oTD.style.borderBottomWidth)
+		}
+	}
+	if(oTD.style.borderLeftWidth!=""){
+		if(oTD.style.borderLeftWidth.indexOf("px")!=-1) {
+			txtBorderLeft.value=parseInt(oTD.style.borderLeftWidth)
+		}
+	}
+	if(oTD.style.borderRightWidth!=""){
+		if(oTD.style.borderRightWidth.indexOf("px")!=-1) {
+			txtBorderRight.value=parseInt(oTD.style.borderRightWidth)
+		}
+	}
+
+    if(oTD.getAttribute("background")!=null) {
+    	form1.txtBackGround.value=oTD.background;
+    }
+	if(form1.txtBackGround.value!=""){
+		form1.chkBackGround.checked=true;
+		form1.txtFile.disabled=false;
+	}
+	else{
+		form1.txtFile.disabled=true;
+	}
+	var sBgRepeat = oTD.style.backgroundRepeat;
+	if(!sBgRepeat) sBgRepeat="repeat";
+	switch(sBgRepeat.toLowerCase()) {
+		case "no-repeat":
+			form1.chkRepeatX.checked=true;
+			form1.chkRepeatY.checked=true;
+			break;
+		case "repeat-x":
+			form1.chkRepeatX.checked=false;
+			form1.chkRepeatY.checked=true;
+			break;
+		case "repeat-y":
+			form1.chkRepeatX.checked=true;
+			form1.chkRepeatY.checked=false;
+			break;
+		default:
+			break;
+	}
+	var sBgPosition = oTD.style.backgroundPosition;
+	var sPos = $api.fn.trim(sBgPosition).split(" ");
+	if(sPos.length!=2) return;
+	form1.txtBGLeft.value = (sPos[0]=="center"?"50%":(sPos[0]=="top"?"0":(sPos[0]=="bottom"?"100%":(sPos[0].indexOf("%")==-1?parseInt(sPos[0]):sPos[0]))));
+	form1.txtBGTop.value = (sPos[1]=="center"?"50%":(sPos[1]=="left"?"0":(sPos[1]=="right"?"100%":(sPos[1].indexOf("%")==-1?parseInt(sPos[1]):sPos[1]))));
+	bLoaded = true;
+}
+
+function txtFile_onfocus(){
+	if(form1.txtFile.value=="")
+		return;
+	if(form1.txtFile.OldValue==form1.txtFile.value){
+		return;
+	}
+	form1.txtFile.OldValue=form1.txtFile.value;
+	var sType=$api.fn.getFileExtName(form1.txtFile.value).toUpperCase();
+
+	if(";BMP;GIF;JPG;JPEG;".indexOf(";"+sType+";")==-1){
+		alert("请选择图片文件！");bUploadFile=false;
+	}
+	else{
+		bMustUpload=true;
+		setApply(false);
+	}
+}
+
+function doOK(){
+	doApply("$api.win.close()");
+}
+
+function doApply(script){
+
+	if(bMustUpload){
+		doUpload();
+		return false;
+	}
+	else{
+		oTD.align=selAlign.value;
+		oTD.vAlign=selVAlign.value;
+
+		if(chkwidth.checked){
+			var sWidth=txtWidth.value;
+			if(optWidth1.checked){
+				sWidth+="px";
+			}
+			else if(optWidth2.checked){
+				sWidth+="%";
+			}
+			oTD.width=sWidth;
+			oTD.style.width = sWidth;
+		}
+		else{
+			oTD.removeAttribute("width");
+		}
+		oTD.removeAttribute("style");
+
+		if(form1.chkBackGround.checked){
+			oTD.background=form1.txtBackGround.value;
+
+			if(form1.chkRepeatX.checked) {
+			   if(form1.chkRepeatY.checked) {
+				   oTD.style.backgroundRepeat = "no-repeat";
+			   }
+			   else {
+				   oTD.style.backgroundRepeat = "repeat-y";
+			   }
+			}
+			else {
+			   if(form1.chkRepeatY.checked) {
+				   oTD.style.backgroundRepeat = "repeat-x";
+			   }
+			}
+			//if(form1.chkRepeatX.checked||form1.chkRepeatY.checked) {
+			if(form1.txtBGLeft.value==""){
+				form1.txtBGLeft.value = "0";
+			}
+			if(form1.txtBGTop.value==""){
+			    form1.txtBGTop.value = "0";
+			}	
+			oTD.style.backgroundPosition = form1.txtBGLeft.value+(form1.txtBGLeft.value.indexOf("%")==-1?"px":"")+" "+form1.txtBGTop.value+(form1.txtBGTop.value.indexOf("%")==-1?"px":"");
+			//}
+
+		}
+		else
+			oTD.removeAttribute("background");
+
+		oTD.bgColor=selBGColor.value;
+
+		oTD.borderColor=txtBorderColor.value;
+		if(txtHeight.value!="") {
+			oTD.height=txtHeight.value;
+			oTD.style.height = txtHeight.value;
+		}
+		else {
+		    oTD.removeAttribute("height");
+		}
+		if(txtLineHeight.value!="") {
+			oTD.style.lineHeight = txtLineHeight.value+"px";
+		}
+		
+		if($api.fn.isInt(txtBorderTop.value)){
+			oTD.style.borderTop="solid "+(txtLightBorder.value!=""?txtLightBorder.value:(txtBorderColor.value!=""?txtBorderColor.value:"#000000"))+" "+txtBorderTop.value+"px";
+		}
+		else{
+			oTD.style.borderTop="none";
+		}
+
+		if($api.fn.isInt(txtBorderBottom.value)){
+			oTD.style.borderBottom="solid "+(txtDarkBorder.value!=""?txtDarkBorder.value:(txtBorderColor.value!=""?txtBorderColor.value:"#000000"))+" "+txtBorderBottom.value+"px";
+		}
+		else{
+			oTD.style.borderBottom="none";
+		}
+
+		if($api.fn.isInt(txtBorderLeft.value)){
+			oTD.style.borderLeft="solid "+(txtLightBorder.value!=""?txtLightBorder.value:(txtBorderColor.value!=""?txtBorderColor.value:"#000000"))+" "+txtBorderLeft.value+"px";
+		}
+		else{
+			oTD.style.borderLeft="none";
+		}
+
+		if($api.fn.isInt(txtBorderRight.value)){
+			oTD.style.borderRight="solid "+(txtDarkBorder.value!=""?txtDarkBorder.value:(txtBorderColor.value!=""?txtBorderColor.value:"#000000"))+" "+txtBorderRight.value+"px";
+		}
+		else{
+			oTD.style.borderRight="none";
+		}
+
+		oTD.borderColorDark=txtDarkBorder.value;
+		oTD.borderColorLight=txtLightBorder.value;
+
+
+		oTD.colSpan=txtColSpan.value;
+		oTD.rowSpan=txtRowSpan.value;
+
+
+	}
+	btnApply.disabled=true;
+
+	if(script){
+		eval(script);
+	}
+}
+
+function SetEnabled(bEnabled){
+	var shtml=txWidth.innerHTML;
+	if(bEnabled){
+		shtml=shtml.replace(/disabled/ig,"nodisabled");
+	}
+	else{
+		shtml=shtml.replace(/nodisabled/ig,"disabled");
+    }
+
+    try{
+		txWidth.innerHTML=shtml;
+	}catch(e){}
+}
+
+function onUploadComplete(errNum,errMsg,sUploadList){
+	if(errNum!=0){
+		alert("文件上传错误！");
+		return;
+	}
+
+	form1.txtBackGround.value=sUploadList.split("=")[1];
+	if(bUploadSetted) sUploadFile+=$api.fn.getFileFullName(sUploadList.split("=")[1])+";";
+	bUploadFile=false;
+	doApply();
+}
+
+function setSelectValue(el,value){
+   if(value==null){
+		value="";
+	}
+   el.value=value;
+   el.style.backgroundColor=value;
+   el.style.color=getReverseColor(value);
+   btnApply.disabled=false;
+}
+
+function selfColor(sCtrlId,bAfterDialog){
+    var oTxt=document.getElementById(sCtrlId);
+	if(!bAfterDialog){
+		var sClr=showColor(oTxt.value,"selfColor('"+sCtrlId+"',true)");
+		if(sClr==null){
+			return;
+		}
+	}
+    setSelectValue(oTxt,getReturnValue());
+    btnApply.disabled=false
+}
+
+function setApply(bTrueFalse) {
+    btnApply.disabled=bTrueFalse;
+}
+
+function doUpload(){
+	if(!bMustUpload){
+		return;
+	}
+	var sFolder=$wapper.api.getQueryString("folder","folder");
+	form1.action=getUploadAction($wapper.api.getQueryString("files_web"),"folder="+$wapper.api.getQueryString("folder","folder")+"&script=parent.afterUpload()");
+	form1.submit();
+}
+
+function afterUpload(){
+	if(w_hidden.getFileCount()!=1||w_hidden.getLastError()){
+		alert(w_hidden.getLastError());
+		return;
+	}
+	form1.txtBackGround.value=w_hidden.getFileURL(0);
+	bMustUpload=false;
+	doApply("$api.win.close()");
+}
+
+</script>
+	</HEAD>
+	<BODY style="MARGIN:10px" scroll="no" bgcolor="#F0F0F0" onload="window_onload()">
+		<table>
+			<tr>
+				<td valign="top">
+					<fieldset style="PADDING:6px;HEIGHT:120px">
+        <legend>布局</legend>
+        水平对齐：<select id="selAlign" style="WIDTH:60px" onchange="if(bLoaded)setApply(false);">
+        					<option value="">(默认)
+							<option value="left" selected>
+							左对齐<option value="center">
+							居中<option value="right">右对齐</option>
+						</select><br>
+        垂直对齐：<select id="selVAlign" style="WIDTH:60px"  onchange="if(bLoaded)setApply(false);">
+							<option value="">(默认)
+							<option value="top">
+							上<option value="middle" selected>
+							中<option value="bottom">下</option>
+						</select><br><br>
+         跨越行数：<input id="txtRowSpan" style="WIDTH:60px" onkeypress="checkInput(event);" onchange="setApply(false)" id="txtRowSpan"><br>
+        跨越列数：<input id="txtColSpan" style="WIDTH:60px" onkeypress="checkInput(event);" onchange="setApply(false)" id="txtColSpan">
+        </fieldset>
+				<td valign="top">
+					<fieldset style="PADDING-RIGHT:5px;PADDING-LEFT:2px;PADDING-BOTTOM:5px;PADDING-TOP:5px;HEIGHT:120px">
+						<legend>最小尺寸</legend>
+						<table>
+							<tr>
+								<td valign="top"><input type="checkbox" id="chkwidth" onclick="SetEnabled(this.checked)">
+								<label for="chkwidth">宽度</label>
+								<td id="txWidth"><div disabled id="divWidth"><input id="txtWidth" style="WIDTH:50px" onkeypress="checkInput(event);" onchange="setApply(false);"><br>
+										<nobr><input type="radio" id="optWidth1" name="optWidth" value="px" checked onclick="setApply(false);">像素<input
+										type="radio" id="optWidth2" name="optWidth" value="px" onclick="setApply(false);">百分比</nobr></div></td>
+							</tr>
+							<tr><td colspan=2>
+								高度:<input id="txtHeight" style="WIDTH:60px"  onkeypress="checkInput(event);" onchange="setApply(false)"><br>
+							<tr><td colspan=2>
+								行高:<input id="txtLineHeight" style="WIDTH:60px"  onkeypress="checkInput(event);" onchange="setApply(false)"><br>
+						</table>
+					</fieldset>
+				<td rowspan="3" valign="top"><br>
+					<input type="button" value=" 确 定 " onclick="doOK()" style="HEIGHT:24px"><br>
+					<input type="button" value=" 取 消 " onclick="$api.win.close()" style="HEIGHT:24px"><br>
+					<input type="button" disabled value=" 应 用 " onclick="doApply()" style="HEIGHT:24px" id="btnApply"><br>
+			<tr>
+				<td colspan="2">
+		<fieldset style="PADDING-RIGHT:5px;PADDING-LEFT:10px;PADDING-BOTTOM:5px;PADDING-TOP:5px;HEIGHT:110px">
+       <legend>自定义背景</legend>
+       背景颜色：
+        <input type=text id=selBGColor model=clrtxt style="width:60px" value="" maxlength=7 onkeypress="checkInput(event,16);" onchange="setApply(false)">
+            <INPUT style="FONT-SIZE: 9pt;WIDTH: 20px;HEIGHT: 20px" type="button" value="…" onclick="selfColor('selBGColor')">
+			<form target=w_hidden ENCTYPE="multipart/form-data" method=post id=form1>
+			<input type=checkbox id=chkBackGround  name=chkBackGround onclick="form1.txtFile.disabled=!this.checked;setApply(false);">&nbsp;<Label for="chkBackGround">背景图</label>
+			<input type=file name=txtFile style="width:250px" onkeydown="event.returnValue=false" oncontextmenu="return false" onfocus="txtFile_onfocus()" onclick="this.onfocus()">
+			<input id=txtBackGround type=hidden><br>
+						&nbsp;&nbsp;<input type=checkbox id=chkRepeatX name=chkRepeatX onclick="setApply(false)">&nbsp;<Label for="chkRepeatX">X-方向不重复</label>
+						<input type=checkbox id=chkRepeatY name=chkRepeatY onclick="setApply(false)">&nbsp;<Label for="chkRepeatY">Y-方向不重复</label>
+						<br>&nbsp;&nbsp;&nbsp;相对位置：Left&nbsp;<input type=text name=txtBGLeft maxlength=4 onkeypress="checkInput(event,12)" style="width:60px" onchange="setApply(false);">&nbsp;&nbsp;
+						Top&nbsp;<input type=text name=txtBGTop maxlength=4 onkeypress="checkInput(event,12)" style="width:60px" onchange="setApply(false);">
+			</form>
+    </fieldset>
+			<tr>
+				<td>
+					<fieldset style="PADDING-RIGHT:5px;PADDING-LEFT:5px;PADDING-BOTTOM:5px;WIDTH:175px;PADDING-TOP:5px;HEIGHT:100px">
+				   <legend>自定义颜色</legend>
+					边框：&nbsp;&nbsp;&nbsp;&nbsp;
+					<input type=text id=txtBorderColor model=clrtxt style="width:60px" value="" maxlength=7  onkeypress="checkInput(event,16);" onchange="setApply(false)">
+						<INPUT style="FONT-SIZE: 9pt;WIDTH: 20px;HEIGHT: 20px" type="button" value="…" onclick="selfColor('txtBorderColor')">
+						<br>
+						浅色边框：
+					<input type=text id=txtLightBorder model=clrtxt style="width:60px" value=""  maxlength=7  onkeypress="checkInput(event,16);" onchange="setApply(false)">
+						<INPUT style="FONT-SIZE: 9pt;WIDTH: 20px;HEIGHT: 20px" type="button" value="…" onclick="selfColor('txtLightBorder')">
+						<br>
+						深色边框：
+					<input type=text id=txtDarkBorder model=clrtxt style="width:60px" value=""  maxlength=7  onkeypress="checkInput(event,16);" onchange="setApply(false)">
+						<INPUT style="FONT-SIZE: 9pt;WIDTH: 20px;HEIGHT: 20px" type="button" value="…" onclick="selfColor('txtDarkBorder')"></fieldset></td>
+				</fieldset>
+				<td valign="top">
+					<fieldset style="PADDING-RIGHT:5px;PADDING-LEFT:5px;PADDING-BOTTOM:5px;PADDING-TOP:5px;HEIGHT:100px">
+						<legend>单元格边框</legend>
+							上：<input type="text" style="width:30px" id="txtBorderTop" maxlength="1"  onkeypress="checkInput(event);" onchange="setApply(false)" >下：<input type="text" style="width:30px" id="txtBorderBottom" maxlength="1" onkeypress="checkInput(event);" onchange="setApply(false)" >
+							<br>
+							左：<input type="text" style="width:30px" id="txtBorderLeft" maxlength="1" onkeypress="checkInput(event);" onchange="setApply(false)"  >右：<input type="text" style="width:30px" id="txtBorderRight" maxlength="1" onkeypress="checkInput(event);" onchange="setApply(false)" >
+
+					</fieldset>
+			</tr>
+		</table>
+		<iframe id=w_hidden name=w_hidden style="display:none"></iframe>
+	</BODY>
+</HTML>

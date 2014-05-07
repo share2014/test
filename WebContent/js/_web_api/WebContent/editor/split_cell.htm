@@ -1,0 +1,53 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="../web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper.api.include("dialog");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function doOK(){
+	var sRet="";
+	if(rdoSplitRow.checked){
+		if(isNaN(txtRowCount.value)||txtRowCount.value==""){
+			alert("请输入需要拆分的行数！");
+			return;
+		}
+		sRet+=txtRowCount.value;
+	}
+	else{
+		sRet+="0";
+	}
+	sRet+="\n";
+	if(rdoSplitCol.checked){
+		if(isNaN(txtColCount.value)||txtColCount.value==""){
+			alert("请输入需要拆分的列数！");
+			return;
+		}
+		sRet+=txtColCount.value;
+	}
+	else{
+		sRet+="0";
+	}
+	setReturnValue(sRet);
+	$api.win.close();
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY bgcolor="#F0F0F0">
+<table align=center>
+<tr><td><input type=radio name=rdoSplit id=rdoSplitRow checked><label for=rdoSplitRow>拆分成</label><input id=txtRowCount value=2 style="width:40px;text-align:center;"><label for=rdoSplitRow>行</label>
+<tr><td><input type=radio name=rdoSplit id=rdoSplitCol><label for=rdoSplitCol>拆分成</label><input id=txtColCount value=2 style="width:40px;text-align:center;"><label for=rdoSplitCol>列</label>
+</table>
+<hr>
+<div align=right style="padding-top:12px;padding-right:20px">
+<input type=button value="确 定" onclick=doOK()>
+<input type=button value="取 消" onclick="$api.win.close();">
+</div>
+</BODY>
+</HTML>

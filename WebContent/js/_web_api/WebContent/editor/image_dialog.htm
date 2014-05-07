@@ -1,0 +1,463 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE=javascript src="../web_api_wapper.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper._language_new_version=null;
+$wapper.win_remark = "$api.win.frames[0]";
+$wapper.api.include("files_web,language,dialog");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var oImg=null;
+if($wapper.api.getQueryString("object_id","")!=""){
+	oImg=$api.win.dialogArguments.getEditorDOM().getElementById($wapper.api.getQueryString("object_id",""));
+}
+var WidthToHeight=1;
+var sScriptOK="";
+
+var bMustUpload=false;
+var sUploadURL="";
+var nUploadFileSize=0;
+
+var writeSrcControl=null;
+var writeSrcType=null;
+var onSrcTypeSelect=null;
+var getOtherTypeSrc=null;
+function window_onload(){
+	$wapper.api.doLanguageBinding("span_source,lbl_source1,lbl_source2,lbl_arrangement,td_align,align_node,align_left,align_right,align_texttop,align_absmiddle,align_baseline,align_textbottom,align_top,align_middle,align_bottom,td_border,lbl_space,span_h_space,span_v_space,lbl_size,lbl_limit_size,span_width,span_height,lbl_lock_size,btn_ok,btn_cancel,btn_apply");
+	if(oImg){
+		form1.rdoSource[1].checked=true;
+		form1.txtInternetURL.value=oImg.src;
+		form1.btnApply.style.display="";
+		divPreview.innerHTML=$api.fn.getOuterHTML(oImg);
+		divPreview.getElementsByTagName("IMG")[0].src=oImg.src;
+		//form1.txtAlt.value=oImg.alt.toLowerCase();
+		form1.selAlign.value=oImg.align.toLowerCase();
+		if(oImg.border){
+			form1.txtBorder.value=oImg.border;
+		}
+		if(oImg.hspace){
+			form1.txtHSpace.value=oImg.hspace;
+		}
+		if(oImg.vspace){
+			form1.txtVSpace.value=oImg.vspace;
+		}
+		form1.chkSize.checked=true;
+		form1.txtWidth.value=oImg.offsetWidth;
+		form1.txtHeight.value=oImg.offsetHeight;
+		WidthToHeight=oImg.offsetWidth/oImg.offsetHeight;
+		form1.chkSize.onclick();
+	}
+	form1.btnApply.disabled=true;
+	rdoSource_onclick();
+}
+
+function getImageSrc(){
+	var sSrc="";
+	if(document.getElementById("rdoSource1").checked){
+		sSrc="file://"+$api.fn.getLocalFilePath(form1.txtFile);
+	}
+	else if(document.getElementById("rdoSource2").checked){
+		sSrc=form1.txtInternetURL.value;
+	}
+	else if(getOtherTypeSrc!=null){
+		sSrc=getOtherTypeSrc();
+	}
+	//sSrc =sSrc;// $api.fn.formatFileName(sSrc,"/");
+	return sSrc;
+}
+
+function doPreview(){
+	var sSrc=getImageSrc();
+	if(sSrc=="") return;
+	
+	if(!checkImageFile(sSrc)){
+		alert(sPleaseSelectPic);
+		return;
+	}
+	divPreview.innerHTML="";
+	
+    if(!$api.fn._IE()){
+	    var oImg=document.createElement("IMG");
+	    oImg.src=sSrc;
+		divPreview.appendChild(oImg);
+	    $wapper.api.showLocalImg(form1.txtFile,oImg);
+    }
+	else {
+	    var oImgDiv=document.createElement("DIV");
+		oImgDiv.id="divImg";
+		divPreview.appendChild(oImgDiv);
+        oImgDiv = $wapper.api.id("divImg");
+		oImgDiv.style.width = "210px";     
+        oImgDiv.style.height = "240px"; 
+	    oImgDiv.style.filter="progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod = image)";    
+        oImgDiv.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = sSrc;  
+		
+	}
+}
+
+function checkImageFile(sSrc){
+	if(sSrc==""){
+		return false;
+	}
+
+	var sExtName=$api.fn.getFileExtName(sSrc).toUpperCase();
+	if(";GIF;JPG;JPEG;BMP;PNG;TIF;".indexOf(";"+sExtName+";")==-1){
+		return false;
+	}
+	return true;
+}
+
+function chkSize_onclick(){
+	if(divPreview.getElementsByTagName($api.fn._IE()&&!oImg?"DIV":"IMG").length==0){
+		form1.chkSize.checked=false;
+		return;
+	}
+	if(!form1.chkSize.checked){
+		divPreview.getElementsByTagName($api.fn._IE()&&!oImg?"DIV":"IMG")[0].removeAttribute("width");
+		divPreview.getElementsByTagName($api.fn._IE()&&!oImg?"DIV":"IMG")[0].style.width="";
+		divPreview.getElementsByTagName($api.fn._IE()&&!oImg?"DIV":"IMG")[0].removeAttribute("height");
+		divPreview.getElementsByTagName($api.fn._IE()&&!oImg?"DIV":"IMG")[0].style.height="";
+	}
+	form1.txtHeight.value=divPreview.getElementsByTagName($api.fn._IE()&&!oImg?"DIV":"IMG")[0].offsetHeight;
+	form1.txtWidth.value=divPreview.getElementsByTagName($api.fn._IE()&&!oImg?"DIV":"IMG")[0].offsetWidth;
+	form1.txtHeight.disabled=!form1.chkSize.checked;
+	form1.txtWidth.disabled=!form1.chkSize.checked;
+	form1.chkLockSize.disabled=!form1.chkSize.checked;
+	chkLockSize_onClick();
+	form1.btnApply.disabled=false;
+}
+
+function chkLockSize_onClick(){
+	if(divPreview.firstChild==null){
+		form1.chklocksize.checked=false;
+		return;
+	}
+	if(!isNaN(parseInt(form1.txtHeight.value))){
+		WidthToHeight=form1.txtWidth.value/form1.txtHeight.value;
+	}
+	else{
+		WidthToHeight=-1;
+	}
+}
+
+function txtwidth_onkeyup(){
+	var w=parseInt(form1.txtWidth.value);
+	if(form1.chkLockSize.checked&&!isNaN(w)&&!isNaN(WidthToHeight)&&WidthToHeight!=0){
+		form1.txtHeight.value=parseInt(w/WidthToHeight);
+	}
+	resizeImage();
+	form1.btnApply.disabled=false;
+}
+
+function txtheight_onkeyup(){
+	var h=parseInt(form1.txtHeight.value);
+	if(form1.chkLockSize.checked&&!isNaN(h)&&!isNaN(WidthToHeight)&&WidthToHeight!=0){
+		form1.txtWidth.value=parseInt(h*WidthToHeight);
+	}
+	resizeImage();
+	form1.btnApply.disabled=false;
+}
+
+function resizeImage(){
+	var oImg=divPreview.getElementsByTagName("IMG")[0];
+	if(oImg&&oImg.tagName=="IMG"){
+		try{
+			oImg.width=form1.txtWidth.value;
+			oImg.height=form1.txtHeight.value;
+			oImg.style.width=form1.txtWidth.value;
+			oImg.style.height=form1.txtHeight.value;
+		}
+		catch(e){
+		}
+	}
+}
+
+function applyProperties(el){
+	if(!el){
+		el=divPreview.getElementsByTagName("IMG");
+	}
+	try{
+		//el.alt=form1.txtAlt.value;
+		el.align=form1.selAlign.value;
+		if(form1.txtBorder.value!=""){
+			el.border=form1.txtBorder.value;
+		}
+		else{
+			el.border=0;
+		}
+		if(form1.txtHSpace.value!=""){
+			el.hspace=form1.txtHSpace.value;
+		}
+		else{
+			el.hspace=0;
+		}
+		if(form1.txtVSpace.value!=""){
+			el.vspace=form1.txtVSpace.value;
+		}
+		else{
+			el.vspace=0;
+		}
+		if(form1.chkSize.checked){
+			el.width=form1.txtWidth.value;
+			el.height=form1.txtHeight.value;
+			el.style.width=form1.txtWidth.value;
+			el.style.height=form1.txtHeight.value;
+		}
+		else{
+			el.removeAttribute("width");
+			el.removeAttribute("height");
+			el.style.width="";
+			el.style.height="";
+		}
+	}
+	catch(e){
+		//alert("不能识别的文件！");
+	}
+	form1.btnApply.disabled=false;
+}
+
+function onUploadImgChange(){
+	if(form1.txtFile.value==""){
+		return;
+	}
+	doPreview();
+	bMustUpload=true;
+	form1.btnApply.disabled=false
+}
+
+function doOK(){
+	sScriptOK="$api.win.close();";
+	doApply();
+}
+
+function doApply(){
+	if(!oImg&&(getImageSrc()==""||getImageSrc()=="file://"||getImageSrc()=="http://")){
+		alert(sPleaseSelectFile);
+		return false;
+	}
+	if(bMustUpload){
+		doUpload();
+		return false;
+	}
+	else{
+		if(divPreview.childNodes.length==0){
+			doPreview();
+		}
+		if(divPreview.childNodes.length==0){
+			alert("error");
+		}
+		if(divPreview.getElementsByTagName("IMG").length==0&&document.getElementById("divImg")==null){
+			return false;
+		}
+		var sSrc = "";
+		if(divPreview.getElementsByTagName("IMG").length>0) {
+		    sSrc = divPreview.getElementsByTagName("IMG")[0].src;
+		}
+		else {
+		    sSrc = document.getElementById("divImg").filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src;    
+		}
+	    setReturnValue((!$api.fn._IE()?divPreview.innerHTML.replace(/%20/g," "):"<img src=\""+sSrc.replace(/%20/g," ")+"\" "+(form1.selAlign.value!=""?"align=\""+form1.selAlign.value+"\"":"")+" "+(form1.txtBorder.value!=""?"border=\""+form1.txtBorder.value+"\"":"border=0")+" "+(form1.txtHSpace.value!=""?"hspace=\""+form1.txtHSpace.value+"\"":"")+" "+(form1.txtVSpace.value!=""?"vspace=\""+form1.txtVSpace.value+"\"":"")+" "+(form1.txtWidth.value!=""?"width=\""+form1.txtWidth.value+"\"":"")+" "+(form1.txtHeight.value!=""?"height=\""+form1.txtHeight.value+"\"":"")+"/>")+"\n"+nUploadFileSize+"\n"+sSrc.replace(/%20/g," "));
+		if(oImg){
+			oImg.src=sSrc.replace(/%20/g," ");
+			applyProperties(oImg);
+		}
+	}
+	if(sScriptOK){
+	
+		eval(sScriptOK);
+		sScriptOK="";
+	}
+	form1.btnApply.disabled=true;
+	return true;
+}
+
+function doUpload(){
+	if(!checkImageFile(form1.txtFile.value)){
+		return;
+	}
+	var sFolder=$wapper.api.getQueryString("folder","upload");
+	form1.action=getUploadAction($wapper.api.getQueryString("files_web"),"&folder="+sFolder+"&script=parent.afterUpload(0)");
+	form1.submit();
+}
+
+function afterUpload(nTry){
+	try{
+		if(w_hidden.getFileCount()!=1||w_hidden.getLastError()){
+			alert(w_hidden.getLastError());
+			return;
+		}
+		var sUrl=w_hidden.getFileURL(0);
+		if($api.fn._IE()) {
+		    divPreview.innerHTML = "";
+			var oImg=document.createElement("IMG");
+			divPreview.appendChild(oImg);
+		}
+		divPreview.getElementsByTagName("IMG")[0].src=sUrl;
+		if($api.fn._IE()) {
+			resizeImage();
+		}
+		bMustUpload=false;
+		if(form1.chkSize.checked) {
+		    w_hidden.location.href= getGraphicAction($wapper.api.getQueryString("files_web"),"op=stretch&file="+$api.fn.encodeURL(sUrl)+"&file_name="+$api.fn.encodeURL($api.fn.getFileBaseName(sUrl)+"_sml")+"&width="+form1.txtWidth.value+"&height="+form1.txtHeight.value+"&script=parent.afterStretch()");
+		}
+		else {
+		    doApply();
+		}
+	}
+	catch(e){
+		nTry=(nTry!=null?(++nTry):0);
+		if(nTry<10){
+			window.setTimeout("afterUpload("+nTry+")",100);
+		}
+	}
+}
+function afterStretch() {
+	var sStretchURL=w_hidden.getStretchURL(0);
+	//alert(sStretchURL)
+	if(sStretchURL!="") {
+	    //if(!$api.fn._IE()) {
+			divPreview.getElementsByTagName("IMG")[0].src=sStretchURL;
+		//}
+		//else {
+		//alert(">>>>>>>>>>"+divPreview.innerHTML)
+		//    divPreview.getElementsByTagName("DIV")[0].filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = sStretchURL;    
+		//}
+	}
+	doApply();
+
+}
+function rdoSource_onclick(nIndex){
+	if(nIndex==null||nIndex==-1){
+		for(var i=1;i<=2;i++){
+			if(document.getElementById("rdoSource"+i).checked){
+				nIndex=i;
+				break;
+			}
+		}
+	}
+	document.getElementById("divSource1").style.display="none";
+	document.getElementById("divSource2").style.display="none";
+	if(nIndex<=2){
+		document.getElementById("divSource"+nIndex).style.display="";
+	}
+	if(onSrcTypeSelect!=null){
+		onSrcTypeSelect(nIndex);
+	}
+}
+
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var sImgSrcJS=$wapper.api.getQueryString("img_src_js","");
+if(sImgSrcJS!=""){
+	$wapper.api.include(sImgSrcJS);
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY ondragstart="return false" bgcolor="#E0E0E0" style="margin:0" scroll="no" onload="window_onload()">
+<form target="w_hidden" ENCTYPE="multipart/form-data" method="post" name="form1">
+		<table border="0" align="center">
+			<tr>
+				<td rowspan="3">
+					<div id="divPreview"  style="width:210px;height:240px;overflow:auto;border:inset 2px;background:white;"></div>
+				<td valign="top">
+					<table>
+						<tr>
+							<td>
+							<span id=spanSource><!--来源:--></span>
+							<td><div id=divSource1><input name="txtFile" id="txtFile" type="file" style="width:250px;" onkeydown="event.returnValue=false" oncontextmenu="return false" onchange="onUploadImgChange(this)"></div>
+								<div id=divSource2 style="display:none"><input name="txtInternetURL" type="text" style="width:210px;"><input type=button style="width:40px;height:22px" value="设定" onclick="doPreview()"></div>
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+								if(writeSrcControl!=null){
+									writeSrcControl();
+								}
+								//-->
+								</SCRIPT>
+						<tr>
+							<td>
+							&nbsp;
+							<td><input type=radio name=rdoSource id=rdoSource1 checked onclick="rdoSource_onclick(1)"><label for=rdoSource1 id=lblSource1><!--自本地--></label>&nbsp;
+								<input type=radio name=rdoSource id=rdoSource2 onclick="rdoSource_onclick(2)"><label for=rdoSource2 id=lblSource2><!--自Internet--></label>&nbsp;
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+								if(writeSrcType!=null){
+									writeSrcType("rdoSource");
+								}
+								//-->
+								</SCRIPT>
+					</table>
+			<tr>
+				<td valign="top">
+					<table width="100%" border="0">
+						<tr>
+							<td width="60%">
+								<fieldset style="padding:5px;">
+									<legend id=lblArrangement>布局</legend>
+									<table>
+										<tr>
+											<td id=tdAlign>
+											对齐:
+											<td><select name="selAlign" style="width:80px;" onchange="applyProperties()">
+													<option value="" id=alignNode>不设置
+													<option value="left" id=alignLeft>左
+													<option value="right" id=alignRight>右
+													<option value="texttop" id=alignTexttop>文本上方
+													<option value="absmiddle" id=alignAbsmiddle>正中央
+													<option value="baseline" id=alignBaseline>基线
+													<option value="textbottom" id=alignTextbottom>正下方
+													<option value="top" id=alignTop>上
+													<option value="middle" id=alignMiddle>中
+													<option value="bottom" id=alignBottom>下
+												</select>
+										<tr>
+											<td id=tdBorder>
+											边框:<td><input name="txtBorder" style="width:80px;" maxlength=3 onchange="applyProperties()">
+									</table>
+								</fieldset>
+							<td width="40%">
+								<fieldset style="padding:5px;">
+									<legend id=lblSpace>间隔</legend>
+									<table>
+										<tr>
+											<td><span id=spanHSpace>水平:</span><input name="txtHSpace" maxlength=4 style="width:50px;" onchange="applyProperties()">
+										<tr>
+											<td><span id=spanVSpace>垂直:</span><input name="txtVSpace" maxlength=4 style="width:50px;" onchange="applyProperties()">
+									</table>
+								</fieldset>
+						<tr>
+							<td colspan="2">
+								<fieldset style="padding:5px;">
+									<legend id=lblSize>尺寸</legend>
+									<table cellpadding="0" cellspacing="0">
+										<tr>
+											<td>
+												<input type="checkbox" name="chkSize" id="chkSize" onclick="chkSize_onclick()">
+												<label for="chkSize" id=lblLimitSize>限定尺寸</label>
+												<span id=spanWidth>宽:</span><input name="txtWidth" disabled style="width:50px;" onkeyup="txtwidth_onkeyup()"  onchange="this.onkeyup()">
+												<span id=spanHeight>× 高:</span><input name="txtHeight" style="width:50px;" disabled onkeyup="txtheight_onkeyup()"  onchange="this.onkeyup()">
+										<tr>
+											<td align="right">
+												<input id="chkLockSize" onclick="chkLockSize_onClick()" type="checkbox" checked disabled>&nbsp;<label for="chklocksize" id=lblLockSize>锁定当前的宽高比例</label>
+									</table>
+								</fieldset>
+					</table>
+			<tr>
+				<td align="right">
+					<input type="button" value="确 定" onclick="doOK()" style="padding-top:1px;width:60px" id="btnOK">
+					<input type="button" value="取 消" onclick="$api.win.close()" id="btnCancel" style="padding-top:1px;width:60px">
+					<input type="button" value="应 用" onclick="doApply()" style="padding-top:1px;display:none;width:60px" id="btnApply" disabled>
+		</table>
+
+	</form>
+	<iframe name="w_hidden" id="w_hidden" style="width:100%;height:200px;display:none"></iframe>
+
+</BODY>
+</HTML>

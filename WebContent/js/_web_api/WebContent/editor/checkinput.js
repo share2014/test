@@ -1,0 +1,2 @@
+function checkInput(c,d){"undefined"==typeof d&&(d=10);var b=!1,a=c.keyCode;switch(d){case 10:b=48>a||57<a;break;case 12:b=48>a||57<a;37==a&&""!=trim(c.srcElement.value)&&-1==c.srcElement.value.indexOf("%")&&(b=!1);45==a&&(b=""==trim(c.srcElement.value)?!1:!0);-1!=c.srcElement.value.indexOf("%")&&(b=!0);break;case 16:b=48>a||57<a&&65>a||70<a&&90>a||102<a;if(35==a)""==trim(c.srcElement.value)&&(b=!1);else if(""==trim(c.srcElement.value)||-1==c.srcElement.value.indexOf("#"))b=!0;break;default:b=48>
+a||57<a&&65>a||90<a&&97>a||102<a}b&&(c.returnValue=!1)};

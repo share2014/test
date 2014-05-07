@@ -1,0 +1,386 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<style>
+a.date_select{color:black;text-decoration:none}
+a.date_select:hover{color:red;text-decoration:underline}
+</style>
+<SCRIPT LANGUAGE=javascript src="web_api_wapper.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bInline = $wp.getQueryString("inline")=="1";
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper.api.include("language,"+(bInline?"dialog_ext":"dialog"));
+
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+if($wapper.api.getQueryString("time","0")=="0"){
+	document.write("<TITLE>"+sSelectDate+"</TITLE>");
+}
+else{
+	document.write("<TITLE>"+sSelectDateTime+"</TITLE>");
+}
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var oDateNow=new Date();
+var oDateSelected=new Date();
+
+var nTempYear=0;
+var nTempMonth=0;
+var nSelDate=0;
+
+var sTimeFormat=$wapper.api.getQueryString("time_format","HH24:MI:SS");
+
+var bMSIE=$api.fn._IE();
+
+function dialogClose() {
+    if(bInline) {
+		//parent.dialogWin.close();
+		closeDialog();
+	}
+	else top.close();
+}
+
+function getDaysOfMonth(nYear,nMonth){
+	if(nMonth==2){
+		return (isLeapYear(nYear,nMonth)?29:28);
+	}
+	if(nMonth==1||nMonth==3||nMonth==5||nMonth==7||nMonth==8||nMonth==10||nMonth==12){
+		return 31;
+	}
+	return 30;
+}
+
+function isLeapYear(nYear){
+	if(!bMSIE){
+		nYear+=1900;
+	}
+	return ((nYear%4)==0&&(nYear%100)!=0)||((nYear%400)==0);
+}
+
+function getDatePanel(nYear,nMonth){
+	var aWeekday=sWeekday.split(" ");
+	var sTable="<table bgcolor=#c0c0c0 cellpadding=3 cellspacing=1><tr bgcolor=#e0e0e0>";
+	for(var i=0;i<7;i++){
+		sTable+="<td style=\"border:solid #ffffff 1px\">"+aWeekday[i];
+	}
+	var nDays=getDaysOfMonth(nYear,nMonth);
+	var oDate=new Date();
+	oDate.setYear(nYear+(bMSIE?0:1900));
+	oDate.setDate(1);
+	oDate.setMonth(nMonth-1);
+	var nBeginDay=oDate.getDay();
+	var nCol=nBeginDay,nRow=0;
+	if(nBeginDay==7){
+		nBeginDay=0;
+	}
+	for(var i=0;i<nBeginDay;i++){
+		if(i==0){
+			sTable+="<tr>";
+			nRow++;
+		}
+		sTable+="<td width=20 bgcolor=#ffffff style=\"border:solid #ffffff 1px\">&nbsp;";
+	}
+	for(var i=0;i<nDays;i++){
+		if((nCol%7)==0){
+			sTable+="<tr>";
+			nRow++;
+			nCol=0;
+		}
+		var sColor="#000000";
+		if(nCol==0){
+			sColor="#990000";
+		}
+		if(nCol==6){
+			sColor="#009900";
+		}
+		sTable+="<td width=20 bgcolor=#ffffff style=\"color:"+sColor+";cursor:hand;border:solid #ffffff 1px\" align=center onmouseover=\"this.style.textDecoration='underline';\" onmouseout=\"this.style.textDecoration='none'\" onclick=selectDateTD(this) id=td_"+(i+1)+"> "+(i+1);
+		nCol++;
+	}
+	while(true){
+		if((nCol%7)==0){
+			nRow++;
+			if(nRow==7){
+				break;
+			}
+			sTable+="<tr>";
+			nCol=0;
+		}
+		sTable+="<td  width=20 bgcolor=#ffffff style=\"border:solid #ffffff 1px\">&nbsp;";
+		nCol++;
+	}
+	sTable+="</table>";
+
+	return sTable;
+}
+function prevYear(){
+	nTempYear--;
+	refreshDatePanel();
+}
+function nextYear(){
+	nTempYear++;
+	refreshDatePanel();
+}
+function prevMonth(){
+	nTempMonth--;
+	if(nTempMonth==0){
+		nTempYear--;
+		nTempMonth=12;
+	}
+	refreshDatePanel();
+}
+
+function nextMonth(){
+	nTempMonth++;
+	if(nTempMonth==13){
+		nTempYear++;
+		nTempMonth=1;
+	}
+	refreshDatePanel();
+}
+
+function refreshDatePanel(){
+	tdDatePanel.innerHTML=getDatePanel(nTempYear,nTempMonth);
+	txtYear.value=nTempYear+(bMSIE?0:1900);
+	txtMonth.value=nTempMonth;
+
+	if((oDateSelected.getYear()==nTempYear||(oDateSelected.getYear()<2000&&oDateSelected.getYear()+1900==nTempYear))&&oDateSelected.getMonth()==(nTempMonth-1)){
+	}
+	else {
+	    oDateSelected=new Date(txtYear.value,txtMonth.value,"1","12","00","00");
+	}
+	var oCurTD=document.getElementById("td_"+oDateSelected.getDate());
+	oCurTD.oldColor=oCurTD.style.color;
+	selectDateTD(oCurTD);
+	if(nTempYear==oDateNow.getYear()&&nTempMonth==(oDateNow.getMonth()+1)){
+		document.getElementById("td_"+oDateNow.getDate()).style.border="solid #303030 1px";
+	}
+
+}
+
+function inputYearMonth(event){
+	if(txtYear.value==""||isNaN(txtYear.value)||parseInt(txtYear.value)<1000||parseInt(txtYear.value)>9999){
+		return;
+	}
+	if(txtMonth.value==""||isNaN(txtMonth.value)||parseInt(txtMonth.value)<1||parseInt(txtMonth.value)>12){
+		return;
+	}
+	if(!(event.keyCode>=48&&event.keyCode<=57)&&!(event.keyCode>=96&&event.keyCode<=105)){
+		return;
+	}
+	nTempYear=parseInt(txtYear.value);
+	nTempMonth=parseInt(txtMonth.value);
+	refreshDatePanel();
+
+}
+
+function selectDateTD(oTD){
+	if((oDateSelected.getYear()==nTempYear||(oDateSelected.getYear()<2000&&oDateSelected.getYear()+1900==nTempYear))&&oDateSelected.getMonth()==(nTempMonth-1)){
+		var oOldTD=document.getElementById("td_"+oDateSelected.getDate());
+		oOldTD.style.backgroundColor="white";
+		oOldTD.style.color=oOldTD.oldColor;
+	}
+
+	oTD.oldColor=oTD.style.color;
+	oTD.style.backgroundColor="darkblue";
+	oTD.style.color="white";
+	oDateSelected.setDate(1);
+	oDateSelected.setYear(nTempYear+(bMSIE?0:1900));
+	oDateSelected.setMonth(nTempMonth-1);
+	oDateSelected.setDate(parseInt(oTD.id.substring(3)));
+}
+
+function window_onload(){
+	if(!bMSIE){
+		document.body.bgColor="lightgray";
+	}
+	var sDateTime=$wapper.api.getQueryString("date","");
+	var sDate=sDateTime;
+	var sTime="";
+	var bTime=($wapper.api.getQueryString("time","0")=="1");
+	if(bTime){
+		var pos=sDateTime.indexOf(" ");
+		if(pos!=-1){
+			sDate=sDateTime.substring(0,pos);
+			sTime=sDateTime.substring(pos+1);
+		}
+		trTime.style.display="";
+	}
+	sDate=sDate.replace(new RegExp("/","gi"),"-");
+	var aParam=sDate.split("-");
+	if(aParam.length==3&&(!isNaN(aParam[0])&&!isNaN(aParam[1])&&!isNaN(aParam[2]))&&(aParam[0]!=""&&aParam[1]!=""&&aParam[2]!="")){
+		nTempYear=parseInt2(aParam[0])-(bMSIE?0:1900);
+		nTempMonth=parseInt2(aParam[1]);
+		nSelDate=parseInt2(aParam[2]);
+	}
+	else{
+		nTempYear=oDateNow.getYear();
+		nTempMonth=(oDateNow.getMonth()+1);
+		nSelDate=oDateNow.getDate();
+	}
+	oDateSelected.setYear(nTempYear+(bMSIE?0:1900));
+	oDateSelected.setMonth(nTempMonth-1);
+	oDateSelected.setDate(nSelDate);
+
+	refreshDatePanel();
+
+	if(bTime){
+		if(sTime==""){
+			var oDate=new Date();
+			sTime=oDate.getHours()+":"+oDate.getMinutes()+":"+oDate.getSeconds();
+		}
+		var aTime=sTime.split(":");
+		while(aTime.length<3){
+			aTime[aTime.length]="00";
+		}
+		if(aTime.length==3){
+			if(document.getElementById("txtHour")){
+				document.getElementById("txtHour").value=aTime[0];
+			}
+			if(document.getElementById("txtMinute")){
+				document.getElementById("txtMinute").value=aTime[1];
+			}
+			if(document.getElementById("txtSecond")){
+				document.getElementById("txtSecond").value=aTime[2];
+			}
+		}
+	}
+
+	window.focus();
+}
+
+function doOK(){
+	var sReturnValue;	
+	sReturnValue=((!bMSIE)?(1900+oDateSelected.getYear()):(oDateSelected.getYear()<100?1900+oDateSelected.getYear():oDateSelected.getYear()))+"-"+(oDateSelected.getMonth()+1)+"-"+oDateSelected.getDate();
+	if($wapper.api.getQueryString("time","0")=="1"){
+		if(document.getElementById("txtHour")){
+			if(txtHour.value==""||isNaN(txtHour.value)||parseInt(txtHour.value)<0||parseInt(txtHour.value)>23){
+				alert(sHourError);
+				txtHour.focus();
+				return;
+			}
+			if(txtHour.value.length==1){
+				txtHour.value="0"+txtHour.value;
+			}
+		}
+		if(document.getElementById("txtMinute")){
+			if(txtMinute.value==""||isNaN(txtMinute.value)||parseInt(txtMinute.value)<0||parseInt(txtMinute.value)>59){
+				alert(sMinuteError);
+				txtMinute.focus();
+				return;
+			}
+			if(txtMinute.value.length==1){
+				txtMinute.value="0"+txtMinute.value;
+			}
+		}
+		if(document.getElementById("txtSecond")){
+			if(txtSecond.value==""||isNaN(txtSecond.value)||parseInt(txtSecond.value)<0||parseInt(txtSecond.value)>59){
+				alert(sSecondError);
+				txtSecond.focus();
+				return;
+			}
+			if(txtSecond.value.length==1){
+				txtSecond.value="0"+txtSecond.value;
+			}
+		}
+		sReturnValue+=" ";
+		var sTimePart=sTimeFormat;
+		if(sTimeFormat.indexOf("HH24")!=-1||sTimeFormat.indexOf("HH")!=-1){
+			sTimePart=sTimePart.replace(/HH24/g,txtHour.value);
+			sTimePart=sTimePart.replace(/HH/g,txtHour.value);
+		}
+		if(sTimeFormat.indexOf("MI")!=-1){
+			sTimePart=sTimePart.replace(/MI/g,txtMinute.value);
+		}
+		if(sTimeFormat.indexOf("SS")!=-1){
+			sTimePart=sTimePart.replace(/SS/g,txtSecond.value);
+		}
+		sReturnValue+=sTimePart;
+	}
+	if(bInline) {
+	    parent.setReturnValue(sReturnValue);
+	}
+	else {
+		setReturnValue(sReturnValue);
+	}
+	dialogClose();
+}
+
+function window_onkeyup(){
+	if(event.keyCode==27){
+		dialogClose();
+	}
+}
+
+function parseInt2(s){
+	var i=0;
+	for(;s.substring(i,i+1)=="0";i++){
+	}
+	return parseInt(s.substring(i));
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload=window_onload() bgcolor=menu style="margin:0" scroll=no onkeyup=window_onkeyup()>
+<table border=0 cellpadding=1 cellspacing=1 align=center>
+<tr><td>
+	<table border=0 width="100%" cellpadding=1 cellspacing=1>
+	<tr><td width=15 align=left><a href="javascript:prevYear()" class=date_select style="font-size:14px">&laquo;</a>
+	    <td width=10 align=left><a href="javascript:prevMonth()" class=date_select>&laquo;</a>
+		<td align=center>
+		<SCRIPT LANGUAGE="JavaScript">
+		<!--
+		var sYearMonth=sYMInput;
+		sYearMonth=sYearMonth.replace("@YI","<input id=txtYear style=\"width:40px;border:none;border-bottom:solid #909090 1px;text-align:center;background:none;\" value="+nTempYear+" maxlength=4 onkeyup=inputYearMonth(event)>");
+		sYearMonth=sYearMonth.replace("@Y",sYearLabel);
+		sYearMonth=sYearMonth.replace("@MI","<input id=txtMonth style=\"width:20px;border:none;border-bottom:solid #909090 1px;text-align:center;background:none;\" value="+nTempMonth+" maxlength=2 onkeyup=inputYearMonth(event)>");
+		sYearMonth=sYearMonth.replace("@M",sMonthLabel);
+		document.write(sYearMonth);
+		//-->
+		</SCRIPT>
+		<td width=10 align=right><a href="javascript:nextMonth()" class=date_select>&raquo;</a>
+		<td width=15 align=right><a href="javascript:nextYear()" class=date_select style="font-size:14px">&raquo;</a>
+	</table>
+<tr><td id=tdDatePanel style="border:inset 1px;background:white">
+<tr id=trTime style="display:none"><td><table align=left><tr><td>
+					<SCRIPT LANGUAGE="JavaScript">
+					<!--
+					document.write(sTimeLabel);
+					
+					var bFirstTimePart=true;
+					if(sTimeFormat.indexOf("HH24")!=-1||sTimeFormat.indexOf("HH")!=-1){
+						bFirstTimePart=false;
+						document.write("<td><input style=\"border:none;background:none;border-bottom:solid #909090 1px;text-align:center;width:30px;\" value=\"12\" maxlength=2 id=txtHour>");
+					}
+					if(sTimeFormat.indexOf("MI")!=-1){
+						if(!bFirstTimePart){
+							document.write("<td>:");
+						}
+						document.write("<td><input style=\"border:none;background:none;border-bottom:solid #909090 1px;text-align:center;width:30px;\" value=\"00\" maxlength=2 id=txtMinute>");
+					}
+					if(sTimeFormat.indexOf("SS")!=-1){
+						if(!bFirstTimePart){
+							document.write("<td>:");
+						}
+						document.write("<input style=\"border:none;background:none;border-bottom:solid #909090 1px;text-align:center;width:30px;\" value=\"00\" maxlength=2 id=txtSecond>");
+					}
+					//-->
+					</SCRIPT>
+						</table>
+<tr><td align=right style="padding-top:8px;">
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+	document.write("<input type=button value=\""+sOk+"\" id=btnOK onclick=doOK()>&nbsp;");
+	document.write("<input type=button value=\""+sCancel+"\" id=btnCancel onclick=\"dialogClose()\">");
+//-->
+</SCRIPT>
+</table>
+</BODY>
+</HTML>

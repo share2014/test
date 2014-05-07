@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>DHTML Editor</TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="/_web_api/web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper._language_new_version=null;
+$wapper.api.include("toolbar,dialog,language,./editor_base,./media,./table");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper._language_new_version=2;
+$wapper.api.include("./editor_ui");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bMSIE=$api.fn._IE();
+$wapper.api.include((bMSIE?"./editor_ie":"./editor_firefox"));
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bFrameComplete=false;
+
+function window_onload(){
+	setContentEditable();
+	if(toolbar2.getButton(sTlbEdit)){
+		toolbar2.getButton(sTlbEdit).setState(toolbar2.tlbPressed);
+	}
+	//oTimer = window.setTimeout("refreshSystemToolbar()",_STATUS_CHECK_IDLE_);
+	attachEvent(getEditorDOM(),"contextmenu",function(event){return false});
+	if($api.fn._IE()) {
+		attachEvent(getEditorDOM(),"keypress",function(event){if(event.keyCode==13) {pasteHTML('<br><!---->');return false;}});
+	}
+	else {
+		pasteHTML("<div></div>");
+	}
+	bFrameComplete=true;
+}
+//-->
+</SCRIPT>
+</HEAD>
+<BODY style="margin:0;border:0;overflow:hidden;" oncontextmenu="return true" onload="window_onload()">
+<table width="100%" HEIGHT="100%" cellpadding=0 cellspacing=0>
+	<SCRIPT LANGUAGE="JavaScript">
+	<!--
+	if(bToolbar2){
+		document.write("<tr><td height=24>");
+		document.write(toolbar1.getHTML());
+	}
+	//-->
+	</SCRIPT>
+<tr><td height=24>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+document.write("<table width=\"100%\" cellpadding=0 cellspacing=0>");
+document.write("<tr><td>");
+document.write(toolbar2.getHTML());
+document.write("<td width=\"100%\" id=tdSelfToolbar>");
+document.write(toolbar3.getHTML());
+document.write("</table>");
+//-->
+</SCRIPT>
+<tr><td>
+<iframe id=DHTMLEditor style="width:100%;height:100%" src="blank.htm" onload="try{getEditorWin().focus()}catch(e){}"></iframe>
+<textarea id="txtSource" style="height:100%;width:100%;display:none;padding:12px;"></textarea>
+</table>
+</BODY>
+</HTML>

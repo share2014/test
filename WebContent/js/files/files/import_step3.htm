@@ -1,0 +1,87 @@
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<TITLE></TITLE>
+<SCRIPT LANGUAGE="JavaScript" src="/_web_api/web_api_wapper.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+if($api.lang.sLanguage&&$api.lang.sCountry){
+	$wapper.api.includeLangBundle("_import_step3",top.getQueryString("system_owner_app"));
+}
+else{
+	$wapper.api.includeLangBundle("_import_step3");
+}
+
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+document.write("<script language=javascript src=\""+top.getQueryString("options_js")+"\">\<\/script>");
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function doNext(){
+	var sUrl=$wapper.api.getParentPath()+"/import_step4.htm?"+$wapper.api.getURLParams()+"&"+Math.random();
+	var sAction=top.getQueryString("action");
+	sAction=resetOptionsURL(sAction,false);
+	sUrl=$wapper.api.setQueryString("action",sAction,sUrl);
+	window.location.href=sUrl;
+}
+
+function doPrev(){
+	var sUrl=$wapper.api.getParentPath()+"/import_step2.htm?"+$wapper.api.getURLParams()+"&"+Math.random();
+	sUrl=resetOptionsURL(sUrl,false);
+	window.location.href=sUrl;
+}
+
+function window_onload(){
+	if(window.navigator.appVersion.indexOf("MSIE")==-1){
+		document.body.bgColor="lightgray";
+	}
+	if($api.lang.sLanguage&&$api.lang.sCountry){
+		$wapper.api.doLanguageBinding("span_wizard,btn_prev,btn_next,btn_cancel");
+	}
+}
+
+//-->
+</SCRIPT>
+</HEAD>
+<BODY  onload="window_onload()" bgcolor=menu style="margin:0" scroll=no>
+<div style="background:white;">
+	<table width="100%"><tr><td style="padding-left:20px;padding-top:4px;" valign="top">
+	<SCRIPT LANGUAGE="JavaScript">
+	<!--
+	var sRemark=top.getQueryString("remark");
+	var nPos=sRemark.indexOf("：");
+	if(nPos!=-1){
+		sRemark="<span style=\"line-height:30px;\"><b>"+sRemark.substring(0,nPos)+"</b></span><br>&nbsp;&nbsp;"+sRemark.substring(nPos+1);
+	}
+	else{
+		sRemark="<span style=\"line-height:30px;\"><b><span id=spanWizard>数据导入向导</span></b></span><br>&nbsp;&nbsp;"+sRemark;
+	}
+	document.write(sRemark);
+	//-->
+	</SCRIPT>
+	<td width=80>
+		<img src="images/import.gif" align=absmiddle>
+	</table>
+</div>
+<p>&nbsp;</p>
+	<table align=center height=270 width="90%">
+	<tr><td>
+		<SCRIPT LANGUAGE="JavaScript">
+		<!--
+		writeOptionsHTML();
+		//-->
+		</SCRIPT>
+
+	</table>
+<div align=right style="margin-top:10px;padding-right:60px;">
+	<input type=button value="上一步" id=btnPrev onclick="doPrev()" style="width:60px">&nbsp;
+	<input type=button value="下一步" id=btnNext onclick="doNext()" style="width:60px">&nbsp;
+	<input type=button value="取 消" id=btnCancel onclick="top.close()" style="width:60px">
+</div>
+
+</BODY>
+</HTML>

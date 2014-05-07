@@ -1,0 +1,53 @@
+<!-- /*
+*Usage:loaded at local wapper, should use function in $wapper.api
+*/ -->
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE></TITLE>
+<style type="text/css">
+body,td,input,select{font-size:9pt;}
+</style>
+<SCRIPT LANGUAGE=javascript src="web_api_wapper.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var bInline = $wp.getQueryString("inline")=="1";
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wapper.api.include("language,"+(bInline?"dialog_ext":"dialog"));
+//-->
+</SCRIPT>
+<SCRIPT LANGUAGE=javascript>
+<!--
+var bMSIE=$api.fn._IE();
+function dialogClose() {
+    if(bInline) {
+		parent.dialogWin.close();
+	}
+	else top.close();
+}
+
+function window_onload(){
+	if(!bMSIE){
+		document.body.bgColor="lightgray";
+	}
+}
+
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload=window_onload() bgcolor=menu>
+<table align=center height=60px>
+<tr><td height=10px>&nbsp;
+<tr><td>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+$wp.html($wp.getQueryString("msg",""));
+//-->
+</SCRIPT>
+<tr><td height=20px>&nbsp;
+</table>
+</BODY>
+</HTML>
